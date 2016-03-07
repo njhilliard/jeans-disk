@@ -1,1 +1,1 @@
-# jeans-galactic-disk
+# jeans-disk

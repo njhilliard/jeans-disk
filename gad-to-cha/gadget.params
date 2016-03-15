@@ -46,7 +46,7 @@ ComovingIntegrationOn     0
 
 CoolingOn                 1 
 StarformationOn           1
- 
+
 %  Caracteristics of run
 
 TimeBegin                 0.0 

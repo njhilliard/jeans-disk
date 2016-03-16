@@ -1,4 +1,5 @@
 import sys
+from param_dict import gad_to_cha_dict
 
 filename = 'gadget.params'
 #filename = sys.argv[1]
@@ -7,7 +8,7 @@ if __name__ == "__main__":
 
     comments = []
     comm_idx = []
-    gdt_prms = []
+    gad_prms = []
 
     with open(filename, 'r') as f:
         lines = f.readlines()
@@ -24,9 +25,9 @@ if __name__ == "__main__":
         elif ' ' in list(line)[0] or len(line)==1:
             pass
         else:
-            gdt_prms.append(line.split()[0])
+            gad_prms.append(line.split()[0])
 
     #print gadget parameters fromatted
     #for prm_name in gdt_prms:
-        #print('                   {:40}{}'.format('\''+prm_name,'\':\'\',\\'))
+        #print('    {:40}{}'.format('\'' + prm_name + '\'',':\'\',\\'))
 

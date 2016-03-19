@@ -1,16 +1,19 @@
 import sys
 from param_dict import gad_to_cha_dict
 
-filename = 'gadget.params'
+fopen = 'gadget.params'
+fwrite = 'changa.params'
 #filename = sys.argv[1]
 
 if __name__ == "__main__":
 
     comments = []
-    comm_idx = []
     gad_prms = []
+    comm_idx = []
+    prms_idx = []
+    empt_idx = []
 
-    with open(filename, 'r') as f:
+    with open(fopen, 'r') as f:
         lines = f.readlines()
 
     for i,line in enumerate(lines):
@@ -23,9 +26,26 @@ if __name__ == "__main__":
             #lines[i] = line.split('%',1)[0]
         # remove empty lines or lines beginning with space
         elif ' ' in list(line)[0] or len(line)==1:
-            pass
+            empt_idx.append(i)
         else:
             gad_prms.append(line.split()[0])
+            prms_idx.append(i)
+
+    with open(fwrite, 'w'):
+        comm_ct = 0
+        prms_ct = 0
+        for i in range(len(lines)):
+            if i in comm_idx:
+                print(comments[comm_ct])
+                comm_ct += 1
+            elif i in empt_idx:
+                print('')
+            elif i in prms_idx:
+                print(gad_to_cha_dict[gad_prms[prms_ct]])
+                prms_ct += 1
+            else:
+                print('badline')
+                
 
     #print gadget parameters fromatted
     #for prm_name in gdt_prms:

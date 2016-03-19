@@ -1,13 +1,13 @@
 # gadget.param : changa.param
 gad_to_cha_dict = {\
-    'CritPhysDensity'                       :'',\
-    'MaxSfrTimescale'                       :'',\
-    'CritOverDensity'                       :'',\
-    'TempSupernova'                         :'',\
-    'TempClouds'                            :'',\
-    'FactorSN'                              :'',\
-    'FactorEVP'                             :'',\
-    'WindEfficiency'                        :'',\
+    'CritPhysDensity'                       :'placeholder1',\
+    'MaxSfrTimescale'                       :'placeholder2',\
+    'CritOverDensity'                       :'placeholder3',\
+    'TempSupernova'                         :'placeholder4',\
+    'TempClouds'                            :'placeholder5',\
+    'FactorSN'                              :'placeholder6',\
+    'FactorEVP'                             :'placeholder7',\
+    'WindEfficiency'                        :'placeholder8',\
     'WindEnergyFraction'                    :'',\
     'WindFreeTravelDensFac'                 :'',\
     'WindFreeTravelMaxTimeFactor'           :'',\

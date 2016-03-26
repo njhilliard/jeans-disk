@@ -1,5 +1,5 @@
 # gadget.param : changa.param
-gad_to_cha_dict = {\
+g2c_dict = {\
     'CritPhysDensity'                       :'placeholder1',\
     'MaxSfrTimescale'                       :'placeholder2',\
     'CritOverDensity'                       :'placeholder3',\
@@ -80,4 +80,4 @@ gad_to_cha_dict = {\
     'SofteningBndryMaxPhys'                 :'',\
     'SofteningHaloMaxPhys'                  :'',\
     'SofteningDiskMaxPhys'                  :'',\
-                  }
+        }

@@ -37,7 +37,7 @@ g2c_name_dict = {\
     'ComovingIntegrationOn'         :'bComove',\
     'CoolingOn'                     :'bGasCooling',\
     'StarformationOn'               :'bStarForm',\
-    'TimeBegin'                     :'',\
+    'TimeBegin'                     :'iStartStep',\
     'TimeMax'                       :'',\
     'Omega0'                        :'dOmega0',\
     'OmegaLambda'                   :'dLambda',\
@@ -47,13 +47,13 @@ g2c_name_dict = {\
     'PeriodicBoundariesOn'          :'bPeriodic',\
     'OutputListOn'                  :'',\
     'OutputListFilename'            :'',\
-    'TimeBetSnapshot'               :'dDelta',\
+    'TimeBetSnapshot'               :'iOutInterval',\
     'TimeOfFirstSnapshot'           :'',\
     'CpuTimeBetRestartFile'         :'',\
-    'TimeBetStatistics'             :'',\
+    'TimeBetStatistics'             :'iLogInterval',\
     'TypeOfTimestepCriterion'       :'',\
     'ErrTolIntAccuracy'             :'dEta',\
-    'MaxSizeTimestep'               :'',\
+    'MaxSizeTimestep'               :'dDelta',\
     'MinSizeTimestep'               :'',\
     'MaxRMSDisplacementFac'         :'',\
     'ErrTolTheta'                   :'dTheta',\
@@ -73,7 +73,7 @@ g2c_name_dict = {\
     'UnitMass_in_g'                 :'dMsolUnit',\
     'UnitVelocity_in_cm_per_s'      :'',\
     'GravityConstantInternal'       :'',\
-    'MinGasHsmlFractional'          :'',\
+    'MinGasHsmlFractional'          :'dhMinOverSoft',\
     'SofteningGasMaxPhys'           :'',\
     'SofteningBulgeMaxPhys'         :'',\
     'SofteningStarsMaxPhys'         :'',\

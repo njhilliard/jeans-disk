@@ -4,6 +4,7 @@
 #  whitespace)
 
 import sys
+import numpy as np
 from astropy import units as u
 from param_dict import g2c_name_dict
 
@@ -18,7 +19,8 @@ class convert_g2c():
         self.empt_idx = []
         self.inlines  = []
         self.outlines = []
-        self.prm_dict = {}
+        self.gad_dict = {}
+        self.cha_dict = {}
 
     def read(self, f_name):
         """Read gadget parameter file"""
@@ -42,9 +44,12 @@ class convert_g2c():
             else:
                 linesplit = line.split()
                 self.gad_name.append(linesplit[0])
-                self.prm_dict[linesplit[0]] = linesplit[1]
+                self.gad_dict[linesplit[0]] = linesplit[1]
                 self.prms_idx.append(i)
-        return self.prm_dict
+        for key in g2c_name_dict:
+            if g2c_name_dict[key] != '':
+                self.cha_dict[g2c_name_dict[key]] = self.gad_dict[key]
+        return self.gad_dict, self.cha_dict
 
     def build_dict(self, f_name, d_name):
         """Build a conversion dictionary from a gadget params file.
@@ -68,7 +73,7 @@ class convert_g2c():
                     pass
                 else:
                     hold2 = [g2c_name_dict[self.gad_name[prms_ct]],\
-                             self.prm_dict[self.gad_name[prms_ct]]]
+                             self.gad_dict[self.gad_name[prms_ct]]]
                     self.outlines.append(hold2)
                 prms_ct += 1
             # Add comment lines
@@ -97,24 +102,31 @@ class convert_g2c():
 
     def convert_vals(self):
         """Convert parameter values"""
+        # mash together gadget directory output and file prefix
+        self.gad_dict['SnapshotFileBase'] =\
+                self.gad_dict['OutputDir'] + '/'\
+                + self.gad_dict['OutputDir']
         # wall runtime limit seconds to minutes
-        self.prm_dict['TimeLimitCPU'] =\
-                str(int(self.prm_dict['TimeLimitCPU'])/ 60)
+        self.gad_dict['TimeLimitCPU'] =\
+                str(int(self.gad_dict['TimeLimitCPU'])/ 60)
+        #self.gad_dict['TimeBetSnapshot'] =\
+                #np.ceil(self.gad_dict['TimeMax'])
+                
         # timesteps
-        #####self.prm_dict['TimeBetSnapshot'] =\
+        #####self.gad_dict['TimeBetSnapshot'] =\
         # gadget courant factor is half of normal
-        self.prm_dict['CourantFac'] =\
-                str(2 * float(self.prm_dict['CourantFac']))
+        self.gad_dict['CourantFac'] =\
+                str(2 * float(self.gad_dict['CourantFac']))
         # convert cm to kpc
-        unitlength = float(self.prm_dict['UnitLength_in_cm']) * u.cm
-        self.prm_dict['UnitLength_in_cm'] =\
+        unitlength = float(self.gad_dict['UnitLength_in_cm']) * u.cm
+        self.gad_dict['UnitLength_in_cm'] =\
                 str(float(unitlength.to(u.kpc) / u.kpc))
         # convert g to solar masses
-        unitmass = float(self.prm_dict['UnitMass_in_g']) * u.g
-        self.prm_dict['UnitMass_in_g'] =\
+        unitmass = float(self.gad_dict['UnitMass_in_g']) * u.g
+        self.gad_dict['UnitMass_in_g'] =\
                 str(float(unitmass.to(u.solMass) / u.solMass))
 
-        return self.prm_dict
+        return self.gad_dict
 
     def write(self, f_name):
         """Write output changa parameter file"""

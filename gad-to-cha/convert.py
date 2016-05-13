@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-# Need to add some cleanup for unnecessary lines (mainly comments and
-#  whitespace)
-
 import sys
 import numpy as np
 import math
@@ -15,11 +12,6 @@ class convert_g2c():
     """Class to provide conversion from gadget to
         changa parameter files"""
     def __init__(self):
-        self.comments = []
-        self.gad_name = []
-        self.comm_idx = []
-        self.prms_idx = []
-        self.empt_idx = []
         self.inlines  = []
         self.outlines = []
         self.gad_dict = OrderedDict()
@@ -81,9 +73,8 @@ class convert_g2c():
                 float(self.gad_dict['TimeBetStatistics'])\
                 / float(self.cha_dict['dDelta'])))
         # factor difference for Eta parameter
-        factor = 1 # placeholder
-        self.cha_dict['dEta'] =\
-                str(factor * float(self.gad_dict['ErrTolIntAccuracy']))
+        self.cha_dict['dEta'] = str(math.sqrt(\
+                2 * float(self.gad_dict['ErrTolIntAccuracy'])))
         # gadget courant factor is half of normal
         self.cha_dict['dEtaCourant'] =\
                 str(2 * float(self.gad_dict['CourantFac']))
@@ -100,10 +91,11 @@ class convert_g2c():
                              ) / G\
                            ).to(u.Msun) / u.Msun\
                         )
+        mass_convert_factor = dMsolUnit / self.gad_dict['UnitMass_in_g']
         self.cha_dict['dMsolUnit'] = str(dMsolUnit)
         print('Warning: mass of simulation has changed due to changa G=1')
 
-        return self.cha_dict
+        return self.cha_dict, mass_convert_factor
 
     def write(self, f_name):
         """Write output changa parameter file"""

@@ -114,6 +114,11 @@ class convert_g2c():
 if __name__ == "__main__":
     fopen = 'gadget.params'
     fwrite = 'changa.param'
+    
+    # TODO:
+    #    Only do ChaNGa gas stuff if GADGET gas is present
+    #    Make whole program accept a gadget HDF5 file and a GADGET param file
+    
     convert = convert_g2c()
     convert.read(fopen)
     convert.parse(g2c_name_dict)

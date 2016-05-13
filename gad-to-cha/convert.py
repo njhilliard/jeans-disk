@@ -91,7 +91,8 @@ class convert_g2c():
                              ) / G\
                            ).to(u.Msun) / u.Msun\
                         )
-        mass_convert_factor = dMsolUnit / self.gad_dict['UnitMass_in_g']
+        mass_convert_factor = float(float(dMsolUnit) * u.Msun\
+                                    / unitmass.to(u.Msun))
         self.cha_dict['dMsolUnit'] = str(dMsolUnit)
         print('Warning: mass of simulation has changed due to changa G=1')
 
@@ -115,10 +116,8 @@ if __name__ == "__main__":
     fwrite = 'changa.param'
     convert = convert_g2c()
     convert.read(fopen)
-    #print(convert.build_outlines(g2c_name_dict))
     convert.parse(g2c_name_dict)
-    #print(convert.convert_vals())
-    convert.convert_vals()
+    print(convert.convert_vals()[1])
     convert.build_outlines()
     convert.write(fwrite)
 

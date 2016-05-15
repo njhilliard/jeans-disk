@@ -26,7 +26,7 @@ class gadget_gas_particles(gadget_particles):
         data['Density'].read_direct(self.density)
 
 
-class gadget_file:
+class File:
     def __init__(self, fname):
         with h5py.File(fname, 'r') as file:
             self.header = file['Header']
@@ -54,3 +54,25 @@ class gadget_file:
             self.boundary = None
             if file.__contains__('PartType5'):
                 self.boundary = gadget_particles(file['PartType5'], self.header.attrs['MassTable'][()][5])
+
+class Parameter_file():
+    def __init__(self, fname):
+        self.fname = fname
+    
+    def __iter__(self):
+        return next(self)
+    
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        with open(self.fname, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line == '':
+                    continue
+                name,value = line.split()[0:2]
+                if '%' in name:
+                    continue
+                yield name,value
+            raise StopIteration()

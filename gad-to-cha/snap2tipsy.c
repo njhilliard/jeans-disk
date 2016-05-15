@@ -1,7 +1,3 @@
-/*
- * Obtained by trq from Rubert Croft via Tiziana De Mateo.
- * Modified significantly by trq.
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,31 +5,53 @@
 #include <assert.h>
 #include <endian.h>
 
+#define MAXDIM 3
+
+struct gas_particle {
+	float mass;
+	float pos[MAXDIM];
+	float vel[MAXDIM];
+	float rho;
+	float temp;
+	float hsmooth;
+	float metals;
+	float phi;
+};
+
+struct dark_particle {
+	float mass;
+	float pos[MAXDIM];
+	float vel[MAXDIM];
+	float eps;
+	float phi;
+};
+
+struct star_particle {
+	float mass;
+	float pos[MAXDIM];
+	float vel[MAXDIM];
+	float metals;
+	float tform;
+	float eps;
+	float phi;
+};
+
+struct dump {
+	double time;
+	int nbodies;
+	int ndim;
+	int nsph;
+	int ndark;
+	int nstar;
+};
+
+struct dump header;
+
 #ifdef GADGET_DOUBLE
 typedef double GFloat;
 #else
 typedef float GFloat;
 #endif
-
-/*
- * In place swap of data
- */
-void swapEndian(void *data, int size, int count) {
-	char *cdata = (char *)data;
-	int iCount;
-
-	for (iCount = 0; iCount < count; iCount++) {
-		int i;
-		char temp;
-
-		for (i = 0; i < size / 2; i++) {
-			temp = cdata[size - i - 1];
-			cdata[size - i - 1] = cdata[i];
-			cdata[i] = temp;
-		}
-		cdata += size;
-	}
-}
 
 double G, Hubble; /* H_0 in 100 km/s/Mpc */
 
@@ -61,11 +79,11 @@ struct io_header_1 {
 	int flag_energydetail;
 	int flag_parentID;
 	int flag_starorig;
-	char fill[256 - 6 * 4 - 6 * 8 - 2 * 8 - 2 * 4 - 6 * 4 - 2 * 4 - 4 * 8 - 9 * 4]; /* fills to 256 Bytes */
+	char fill[256 - 6 * 4 - 6 * 8 - 2 * 8 - 2 * 4 - 6 * 4 - 2 * 4 - 4 * 8
+			- 9 * 4]; /* fills to 256 Bytes */
 } header1;
 
-double softenings[6]; /* Gravitational softenings for each
-			 particle type */
+double softenings[6]; /* Gravitational softenings for each particle type */
 
 #define TYPE_GAS 0
 #define TYPE_HALO 1
@@ -83,13 +101,11 @@ struct particle_data {
 	GFloat tForm;
 	GFloat Metals;
 	int Flag;
-} * P;
+}* P;
 
 int *Id;
 
 double Time, Redshift;
-
-#include "tipsydefs.h"
 
 struct gas_particle gasp;
 struct dark_particle darkp;
@@ -120,7 +136,8 @@ int main(int argc, char **argv) {
 	int bBHBndry; /* Boundary (type = 5) particles are really Black Holes */
 
 	if (argc < 12) {
-		fprintf(stderr, "usage: snap2tipsy h eps_gas eps_dark eps_disk eps_bulge eps_star eps_bndry(BH) bBH massScale <snapshotfile> <tipsyfile> [N_files]\n");
+		fprintf(stderr, "usage: snap2tipsy h eps_gas eps_dark eps_disk eps_bulge eps_star eps_bndry(BH) ");
+		fprintf(stderr, "bBH massScale <snapshotfile> <tipsyfile> [N_files]\n");
 		fprintf(stderr, "	where h is H_0 in 100 km/s/Mpc and softenings are in kpc/h\n");
 		fprintf(stderr, "	bBH = 1 implies type = 5 particles are black holes.\n");
 		exit(-1);
@@ -160,7 +177,7 @@ int main(int argc, char **argv) {
 	free_memory();
 
 	/* Handle funny component particles from Gadget.  Here we assume
-	   that these types are collisionless only.  */
+	 that these types are collisionless only.  */
 	if (header1.redshift != 0.0) {
 		printf("loading disk particles... ");
 		load_snapshot(input_fname, files, type = 2);
@@ -232,9 +249,9 @@ struct units {
 } Unit;
 
 void set_unit() {
-/*
- * Assume length in kpc and mass in 1e10 Solarmasses
- */
+	/*
+	 * Assume length in kpc and mass in 1e10 Solarmasses
+	 */
 #define GRAVITY 6.672e-8
 #define SOLAR_MASS 1.989e33
 #define SOLAR_LUM 3.826e33
@@ -263,16 +280,25 @@ void set_unit() {
 	Unit.Time_in_s = Unit.Length_in_cm / Unit.Velocity_in_cm_per_s;
 	Unit.Time_in_Megayears = Unit.Time_in_s / SEC_PER_MEGAYEAR;
 	Unit.Density_in_cgs = Unit.Mass_in_g / pow(Unit.Length_in_cm, 3);
-	Unit.Pressure_in_cgs = Unit.Mass_in_g / Unit.Length_in_cm / pow(Unit.Time_in_s, 2);
+	Unit.Pressure_in_cgs = Unit.Mass_in_g / Unit.Length_in_cm
+			/ pow(Unit.Time_in_s, 2);
 	Unit.CoolingRate_in_cgs = Unit.Pressure_in_cgs / Unit.Time_in_s;
-	Unit.Energy_in_cgs = Unit.Mass_in_g * pow(Unit.Length_in_cm, 2) / pow(Unit.Time_in_s, 2);
-	Unit.Natural_vel_in_cgs = sqrt(GRAVITY * Unit.Mass_in_g / Unit.Length_in_cm);
+	Unit.Energy_in_cgs = Unit.Mass_in_g * pow(Unit.Length_in_cm, 2)
+			/ pow(Unit.Time_in_s, 2);
+	Unit.Natural_vel_in_cgs = sqrt(
+			GRAVITY * Unit.Mass_in_g / Unit.Length_in_cm);
 
-	fprintf(stdout, "dMsolUnit is %g; dKpcUnit is %g;\n", 1e10 / Hubble, 1.0 / Hubble);
-	fprintf(stdout, "velocity is in units of %g km/s; time is in units of %g Gyr\n", Unit.Natural_vel_in_cgs / 1e5,
-		Unit.Length_in_cm / Unit.Natural_vel_in_cgs / (1e9 * SEC_PER_YEAR));
-	fprintf(stdout, "time is in units of %g Gyr\n", Unit.Time_in_s / ((1e9 * SEC_PER_YEAR)));
-	fprintf(stdout, "G is %g in these units\n", GRAVITY / pow(Unit.Length_in_cm, 3) * Unit.Mass_in_g * pow(Unit.Time_in_s, 2));
+	fprintf(stdout, "dMsolUnit is %g; dKpcUnit is %g;\n", 1e10 / Hubble,
+			1.0 / Hubble);
+	fprintf(stdout,
+			"velocity is in units of %g km/s; time is in units of %g Gyr\n",
+			Unit.Natural_vel_in_cgs / 1e5,
+			Unit.Length_in_cm / Unit.Natural_vel_in_cgs / (1e9 * SEC_PER_YEAR));
+	fprintf(stdout, "time is in units of %g Gyr\n",
+			Unit.Time_in_s / ((1e9 * SEC_PER_YEAR)));
+	fprintf(stdout, "G is %g in these units\n",
+			GRAVITY / pow(Unit.Length_in_cm, 3) * Unit.Mass_in_g
+					* pow(Unit.Time_in_s, 2));
 }
 
 void filter_gas() {
@@ -286,7 +312,8 @@ void filter_gas() {
 	for (i = 1; i <= NumPart; i++) {
 		MeanWeight = 4.0 / (3 * Xh + 1 + 4 * Xh * P[i].Ne) * PROTONMASS;
 
-		P[i].Temp *= MeanWeight / BOLTZMANN * GAMMA_MINUS1 * Unit.Energy_in_cgs / Unit.Mass_in_g;
+		P[i].Temp *= MeanWeight / BOLTZMANN * GAMMA_MINUS1 * Unit.Energy_in_cgs
+				/ Unit.Mass_in_g;
 
 		/* temp now in kelvin */
 	}
@@ -302,7 +329,7 @@ void filter_gas() {
 	for (i = 1; i <= NumPart; i++) {
 
 		/* these are just silly values for the moment, so that
-		   everything will be selected */
+		 everything will be selected */
 
 		if (P[i].Temp > -100000 && P[i].Rho / rhomean > -1000.) {
 			P[i].Flag = 1; /* take it */
@@ -338,8 +365,8 @@ int output_tipsy_gas(char *output_fname) {
 	/* Gadget units have an extra sqrt(a) in the internal velocities. */
 	double vscale = sqrt(1.0 + header1.redshift);
 	/*
-	*Unit.Velocity_in_cm_per_s/Unit.Natural_vel_in_cgs;
-	*/
+	 *Unit.Velocity_in_cm_per_s/Unit.Natural_vel_in_cgs;
+	 */
 
 	if (!(outfile = fopen(output_fname, "w"))) {
 		printf("can't open file `%s'\n", output_fname);
@@ -389,8 +416,8 @@ int output_tipsy_star(char *output_fname, int bBH) {
 	/* Gadget units have an extra sqrt(a) in the internal velocities. */
 	double vscale = sqrt(1.0 + header1.redshift);
 	/*
-	  *Unit.Velocity_in_cm_per_s/Unit.Natural_vel_in_cgs;
-	  */
+	 *Unit.Velocity_in_cm_per_s/Unit.Natural_vel_in_cgs;
+	 */
 
 	if (!(outfile = fopen(output_fname, "a"))) {
 		printf("can't open file `%s'\n", output_fname);
@@ -717,7 +744,8 @@ void load_snapshot(char *fname, int files, int type, float mass_scale) {
 						}
 						return;
 					} else {
-						fprintf(stderr, "Short read of densities at n = %d\n", n);
+						fprintf(stderr, "Short read of densities at n = %d\n",
+								n);
 						exit(-1);
 					}
 				}
@@ -783,7 +811,8 @@ void load_snapshot(char *fname, int files, int type, float mass_scale) {
 				}
 
 		} else {
-			fseek(fd, 5 * (header1.npart[0] * sizeof(GFloat) + 2 * sizeof(int)), SEEK_CUR);
+			fseek(fd, 5 * (header1.npart[0] * sizeof(GFloat) + 2 * sizeof(int)),
+					SEEK_CUR);
 		}
 
 		/*

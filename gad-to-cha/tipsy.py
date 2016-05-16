@@ -56,11 +56,10 @@ class File():
             
             self.gas.temperature *= (mean_weight / constants['boltzmann'] * 
                                      constants['gamma_minus1'] * self.units['Energy_in_cgs'] / 
-                                     self.units['Mass_in_g'])
-
-        if float(gadget_file.header.attrs['Redshift']) > 0.0:
-            self.is_cosmological = True
         
+		if float(gadget_file.header.attrs['Redshift']) > 0.0:
+            self.is_cosmological = True
+
     def set_units(self, gadget_params):
         if not isinstance(gadget_params, gadget.Parameter_file):
             raise ValueError("parameter file is not a 'gadget.Parameter_file'")
@@ -68,8 +67,8 @@ class File():
         constants['hubble'] = float(gadget_params['dHubble0'])
         if constants['hubble'] == 0.0:
             constants['hubble'] = 1.0
-
-        self.units['Length_in_cm'] = float(gadget_params['UnitLength_in_cm']) / hubble
+        
+		self.units['Length_in_cm'] = float(gadget_params['UnitLength_in_cm']) / hubble
         self.units['Mass_in_g'] = float(gadget_params['UnitMass_in_g']) / hubble
         self.units['Velocity_in_cm_per_s'] = float(gadget_params['UnitVelocity_in_cm_per_s'])
         self.units['Time_in_s'] = self.units['Length_in_cm'] / self.units['Velocity_in_cm_per_s']

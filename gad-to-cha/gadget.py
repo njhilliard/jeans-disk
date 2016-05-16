@@ -23,7 +23,6 @@ class gadget_gas_particles(gadget_particles):
     def __init__(self, data, header):
         super().__init__(self, data, header.attrs['MassTable'][()][0])
 
-        # This may actually be the internal energy!
         self.internal_energy = np.empty(data['internal_energy'].shape, data['internal_energy'].dtype)
         data['internal_energy'].read_direct(self.internal_energy)
         

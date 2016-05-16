@@ -2,28 +2,52 @@ import numpy as np
 import h5py
 
 class gadget_particles:
-    def __init__(self, data, mass):
+    def __init__(self, data, mass, read_metals=False):
         self.positions = np.empty(data['Coordinates'].shape, data['Coordinates'].dtype)
         data['Coordinates'].read_direct(self.positions)
         
         self.velocities = np.empty(data['Velocities'].shape, data['Velocities'].dtype)
         data['Velocities'].read_direct(self.velocities)
         
-        self.mass = mass
-        
+        self.mass = mass        
         if (self.mass <= 0):
             self.mass = np.empty(data['Masses'].shape, data['Masses'].dtype)
             data['Masses'].read_direct(self.mass)
 
-class gadget_gas_particles(gadget_particles):
-    def __init__(self, data, mass):
-        super().__init__(self, data, mass)
+        self.metals = 0.0        
+        if read_metals:
+            self.metals = np.empty(data['metals'].shape, data['metals'].dtype)
+            data['metals'].read_direct(self.metals)
 
+class gadget_gas_particles(gadget_particles):
+    def __init__(self, data, header):
+        super().__init__(self, data, header.attrs['MassTable'][()][0])
+
+        # This may actually be the internal energy!
         self.temperature = np.empty(data['Temperature'].shape, data['Temperature'].dtype)
         data['Temperature'].read_direct(self.temperature)
         
         self.density = np.empty(data['Density'].shape, data['Density'].dtype)
         data['Density'].read_direct(self.density)
+
+        self.electron_density = 1.0
+        self.hsml = 1.0        
+        if header.attrs['Flag_Cooling']:
+            self.electron_density = np.empty(data['Ne'].shape, data['Ne'].dtype)
+            data['Ne'].read_direct(self.electron_density)
+            
+            self.hsml = np.empty(data['hsml'].shape, data['hsml'].dtype)
+            data['hsml'].read_direct(self.hsml)
+        
+        self.t_form = None
+        if header.attrs['Flag_StellarAge']:
+            self.t_form = np.empty(data['t_form'].shape, data['t_form'].dtype)
+            data['t_form'].read_direct(self.t_form)
+        
+        self.metals = None
+        if header.attrs['Flag_Metals']:
+            self.metals = np.empty(data['metals'].shape, data['metals'].dtype)
+            data['metals'].read_direct(self.metals)
 
 class File:
     def __init__(self, fname):
@@ -32,7 +56,7 @@ class File:
 
             self.gas = None
             if file.__contains__('PartType0'):
-                self.gas = gadget_gas_particles(file['PartType0'], header.attrs['MassTable'][()][0])
+                self.gas = gadget_gas_particles(file['PartType0'], header)
 
             self.halo = None
             if file.__contains__('PartType1'):

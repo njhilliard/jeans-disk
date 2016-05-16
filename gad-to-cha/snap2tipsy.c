@@ -1,9 +1,9 @@
+#include <assert.h>
+#include <endian.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <assert.h>
-#include <endian.h>
 
 #define MAXDIM 3
 
@@ -55,7 +55,7 @@ typedef float GFloat;
 
 double G, Hubble; /* H_0 in 100 km/s/Mpc */
 
-struct io_header_1 {
+typedef struct io_header_1 {
 	int npart[6];
 	double mass[6];
 	double time;
@@ -79,8 +79,7 @@ struct io_header_1 {
 	int flag_energydetail;
 	int flag_parentID;
 	int flag_starorig;
-	char fill[256 - 6 * 4 - 6 * 8 - 2 * 8 - 2 * 4 - 6 * 4 - 2 * 4 - 4 * 8
-			- 9 * 4]; /* fills to 256 Bytes */
+	char fill[256 - 6 * 4 - 6 * 8 - 2 * 8 - 2 * 4 - 6 * 4 - 2 * 4 - 4 * 8 - 9 * 4]; /* fills to 256 Bytes */
 } header1;
 
 double softenings[6]; /* Gravitational softenings for each particle type */
@@ -101,7 +100,7 @@ struct particle_data {
 	GFloat tForm;
 	GFloat Metals;
 	int Flag;
-}* P;
+} * P;
 
 int *Id;
 
@@ -249,9 +248,9 @@ struct units {
 } Unit;
 
 void set_unit() {
-	/*
-	 * Assume length in kpc and mass in 1e10 Solarmasses
-	 */
+/*
+ * Assume length in kpc and mass in 1e10 Solarmasses
+ */
 #define GRAVITY 6.672e-8
 #define SOLAR_MASS 1.989e33
 #define SOLAR_LUM 3.826e33
@@ -280,25 +279,17 @@ void set_unit() {
 	Unit.Time_in_s = Unit.Length_in_cm / Unit.Velocity_in_cm_per_s;
 	Unit.Time_in_Megayears = Unit.Time_in_s / SEC_PER_MEGAYEAR;
 	Unit.Density_in_cgs = Unit.Mass_in_g / pow(Unit.Length_in_cm, 3);
-	Unit.Pressure_in_cgs = Unit.Mass_in_g / Unit.Length_in_cm
-			/ pow(Unit.Time_in_s, 2);
+	Unit.Pressure_in_cgs = Unit.Mass_in_g / Unit.Length_in_cm / pow(Unit.Time_in_s, 2);
 	Unit.CoolingRate_in_cgs = Unit.Pressure_in_cgs / Unit.Time_in_s;
-	Unit.Energy_in_cgs = Unit.Mass_in_g * pow(Unit.Length_in_cm, 2)
-			/ pow(Unit.Time_in_s, 2);
-	Unit.Natural_vel_in_cgs = sqrt(
-			GRAVITY * Unit.Mass_in_g / Unit.Length_in_cm);
+	Unit.Energy_in_cgs = Unit.Mass_in_g * pow(Unit.Length_in_cm, 2) / pow(Unit.Time_in_s, 2);
+	Unit.Natural_vel_in_cgs = sqrt(GRAVITY * Unit.Mass_in_g / Unit.Length_in_cm);
 
-	fprintf(stdout, "dMsolUnit is %g; dKpcUnit is %g;\n", 1e10 / Hubble,
-			1.0 / Hubble);
-	fprintf(stdout,
-			"velocity is in units of %g km/s; time is in units of %g Gyr\n",
-			Unit.Natural_vel_in_cgs / 1e5,
+	fprintf(stdout, "dMsolUnit is %g; dKpcUnit is %g;\n", 1e10 / Hubble, 1.0 / Hubble);
+	fprintf(stdout, "velocity is in units of %g km/s; time is in units of %g Gyr\n", Unit.Natural_vel_in_cgs / 1e5,
 			Unit.Length_in_cm / Unit.Natural_vel_in_cgs / (1e9 * SEC_PER_YEAR));
-	fprintf(stdout, "time is in units of %g Gyr\n",
-			Unit.Time_in_s / ((1e9 * SEC_PER_YEAR)));
+	fprintf(stdout, "time is in units of %g Gyr\n", Unit.Time_in_s / ((1e9 * SEC_PER_YEAR)));
 	fprintf(stdout, "G is %g in these units\n",
-			GRAVITY / pow(Unit.Length_in_cm, 3) * Unit.Mass_in_g
-					* pow(Unit.Time_in_s, 2));
+			GRAVITY / pow(Unit.Length_in_cm, 3) * Unit.Mass_in_g * pow(Unit.Time_in_s, 2));
 }
 
 void filter_gas() {
@@ -312,8 +303,7 @@ void filter_gas() {
 	for (i = 1; i <= NumPart; i++) {
 		MeanWeight = 4.0 / (3 * Xh + 1 + 4 * Xh * P[i].Ne) * PROTONMASS;
 
-		P[i].Temp *= MeanWeight / BOLTZMANN * GAMMA_MINUS1 * Unit.Energy_in_cgs
-				/ Unit.Mass_in_g;
+		P[i].Temp *= MeanWeight / BOLTZMANN * GAMMA_MINUS1 * Unit.Energy_in_cgs / Unit.Mass_in_g;
 
 		/* temp now in kelvin */
 	}
@@ -573,8 +563,8 @@ void load_snapshot(char *fname, int files, int type, float mass_scale) {
 			exit(-1);
 		}
 		if (swap) {
-			swapEndian(&header1, 4, 6);	   // 6 integers
-			swapEndian(&header1.mass, 8, 8);      // 8 doubles
+			swapEndian(&header1, 4, 6);			  // 6 integers
+			swapEndian(&header1.mass, 8, 8);	  // 8 doubles
 			swapEndian(&header1.flag_sfr, 4, 10); // 10 more integers
 			swapEndian(&header1.BoxSize, 8, 4);   // 4 more doubles
 			swapEndian(&header1.flag_sfr, 4, 9);  // 9 more integers
@@ -744,8 +734,7 @@ void load_snapshot(char *fname, int files, int type, float mass_scale) {
 						}
 						return;
 					} else {
-						fprintf(stderr, "Short read of densities at n = %d\n",
-								n);
+						fprintf(stderr, "Short read of densities at n = %d\n", n);
 						exit(-1);
 					}
 				}
@@ -811,8 +800,7 @@ void load_snapshot(char *fname, int files, int type, float mass_scale) {
 				}
 
 		} else {
-			fseek(fd, 5 * (header1.npart[0] * sizeof(GFloat) + 2 * sizeof(int)),
-					SEEK_CUR);
+			fseek(fd, 5 * (header1.npart[0] * sizeof(GFloat) + 2 * sizeof(int)), SEEK_CUR);
 		}
 
 		/*

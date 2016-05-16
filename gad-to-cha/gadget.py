@@ -25,7 +25,6 @@ class gadget_gas_particles(gadget_particles):
         self.density = np.empty(data['Density'].shape, data['Density'].dtype)
         data['Density'].read_direct(self.density)
 
-
 class File:
     def __init__(self, fname):
         with h5py.File(fname, 'r') as file:
@@ -57,22 +56,19 @@ class File:
 
 class Parameter_file():
     def __init__(self, fname):
-        self.fname = fname
-    
-    def __iter__(self):
-        return next(self)
-    
-    def __next__(self):
-        return self.next()
-
-    def next(self):
-        with open(self.fname, 'r') as file:
+        self.data = {}
+        with open(fname, 'r') as file:
             for line in file:
                 line = line.strip()
                 if line == '':
                     continue
-                name,value = line.split()[0:2]
+                name, value, *_ = line.split()
                 if '%' in name:
                     continue
-                yield name,value
-            raise StopIteration()
+                self.data[name] = value
+    
+    def __getitem__(self, key):
+        return self.data[key]
+    
+    def items(self):
+        return self.data.items()

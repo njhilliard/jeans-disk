@@ -1,4 +1,10 @@
+import gadget
+import math
+from astropy import units as u
+from astropy.constants import G
+
 gadget_trans_table = {
+    """Translation table between GADGET and ChaNGa parameter names"""
     'InitCondFile'          : 'achInFile',
     'SnapshotFileBase'      : 'achOutFile',
     'TimeLimitCPU'          : 'iWallRunTime',
@@ -26,57 +32,57 @@ gadget_trans_table = {
     'MinGasHsmlFractional'  : 'dhMinOverSoft'
 }
 
-def convert_parameter_file(self):
+def convert_parameter_file(gadget_params):
         """Convert parameter values"""
+        
+        if not isinstance(gadget_params, gadget.Parameter_file):
+            raise ValueError("parameter file is not a 'gadget.Parameter_file'")
+        
+        # Translate GADGET parameters into ChaNGa parameters
+        changa_parameters = {}
+        for k,v in gadget_params.items():
+            if k in gadget_trans_table:
+                changa_parameters[gadget_trans_table[k]] = v
+        
         # mash together gadget directory output and file prefix
-        self.cha_dict['achOutFile'] = \
-                self.gad_dict['OutputDir'] + '/'\
-                + self.gad_dict['SnapshotFileBase']
+        changa_parameters['achOutFile'] = gadget_params['OutputDir'] + '/' + gadget_params['SnapshotFileBase']
+        
         # wall runtime limit seconds to minutes
-        self.cha_dict['iWallRunTime'] = \
-                str(int(self.gad_dict['TimeLimitCPU']) / 60)
+        changa_parameters['iWallRunTime'] = int(float(gadget_params['TimeLimitCPU']) / 60.0)
+        
         # simulation start step
-        if self.gad_dict['TimeBegin'] != 0:
-            step_floor = math.floor(float(self.gad_dict['TimeBegin']) / \
-                                    float(self.cha_dict['dDelta']))
-            self.cha_dict['iStartStep'] = str(step_floor)
-        else:
-            self.cha_dict['iStartStep'] = '0'
+        _ = float(gadget_params['TimeBegin']) / float(changa_parameters['dDelta'])
+        changa_parameters['iStartStep'] = math.floor(_)
+        
         # number of simulation steps
-        self.cha_dict['nSteps'] = str(math.ceil(\
-                (float(self.gad_dict['TimeMax'])\
-                 - float(self.gad_dict['TimeBegin']))\
-                / float(self.cha_dict['dDelta'])))
-        # output writing interval
-        self.cha_dict['iOutInterval'] = str(math.ceil(\
-                float(self.gad_dict['TimeBetSnapshot'])\
-                / float(self.cha_dict['dDelta'])))
-        # output to log file interval
-        self.cha_dict['iLogInterval'] = str(math.floor(\
-                float(self.gad_dict['TimeBetStatistics'])\
-                / float(self.cha_dict['dDelta'])))
-        # factor difference for Eta parameter
-        self.cha_dict['dEta'] = str(math.sqrt(\
-                2 * float(self.gad_dict['ErrTolIntAccuracy'])))
-        # gadget courant factor is half of normal
-        self.cha_dict['dEtaCourant'] = \
-                str(2 * float(self.gad_dict['CourantFac']))
-        # convert cm to kpc
-        unitlength = float(self.gad_dict['UnitLength_in_cm']) * u.cm
-        dKpcUnit = float(unitlength.to(u.kpc) / u.kpc)
-        self.cha_dict['dKpcUnit'] = str(dKpcUnit)
-        # convert g to solar masses
-        unitmass = float(self.gad_dict['UnitMass_in_g']) * u.g
-        unitvelocity = float(self.gad_dict['UnitVelocity_in_cm_per_s'])\
-                       * u.cm / u.s
-        dMsolUnit = float(((((dKpcUnit * u.kpc).to(u.m)) ** 3\
-                              / (unitlength / unitvelocity) ** 2\
-                             ) / G\
-                           ).to(u.Msun) / u.Msun\
-                        )
-        mass_convert_factor = float(float(dMsolUnit) * u.Msun\
-                                    / unitmass.to(u.Msun))
-        self.cha_dict['dMsolUnit'] = str(dMsolUnit)
-        print('Warning: mass of simulation has changed due to changa G=1')
+        _ = float(gadget_params['TimeMax']) - float(gadget_params['TimeBegin'])
+        _ /= float(changa_parameters['dDelta'])
+        changa_parameters['nSteps'] = math.ceil(_)
 
-        return self.cha_dict, mass_convert_factor
+        # output writing interval
+        _ = float(gadget_params['TimeBetSnapshot']) / float(changa_parameters['dDelta'])
+        changa_parameters['iOutInterval'] = math.ceil(_)
+        
+        # output to log file interval
+        _ = float(gadget_params['TimeBetStatistics']) / float(changa_parameters['dDelta'])
+        changa_parameters['iLogInterval'] = math.floor(_)
+        
+        # factor difference for Eta parameter
+        changa_parameters['dEta'] = math.sqrt(2.0 * float(gadget_params['ErrTolIntAccuracy']))
+        
+        # gadget courant factor is half of normal
+        changa_parameters['dEtaCourant'] = 2.0 * float(gadget_params['CourantFac'])
+        
+        # convert cm to kpc
+        unitlength = float(gadget_params['UnitLength_in_cm']) * u.cm
+        dKpcUnit = unitlength.to(u.kpc) / u.kpc
+        changa_parameters['dKpcUnit'] = dKpcUnit
+        
+        # convert mass to solar masses
+        unitmass = float(gadget_params['UnitMass_in_g']) * u.g
+        unitvelocity = float(gadget_params['UnitVelocity_in_cm_per_s']) * u.cm / u.s
+        dMsolUnit = ((((dKpcUnit * u.kpc).to(u.m)) ** 3 / (unitlength / unitvelocity) ** 2 ) / G ).to(u.Msun) / u.Msun
+        mass_convert_factor = (dMsolUnit * u.Msun) / unitmass.to(u.Msun)
+        changa_parameters['dMsolUnit'] = dMsolUnit
+
+        return changa_parameters, mass_convert_factor

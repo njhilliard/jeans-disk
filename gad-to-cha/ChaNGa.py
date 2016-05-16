@@ -39,50 +39,54 @@ def convert_parameter_file(gadget_params):
             raise ValueError("parameter file is not a 'gadget.Parameter_file'")
         
         # Translate GADGET parameters into ChaNGa parameters
-        changa_parameters = {}
+        changa_params = {}
         for k,v in gadget_params.items():
             if k in gadget_trans_table:
-                changa_parameters[gadget_trans_table[k]] = v
+                changa_params[gadget_trans_table[k]] = v
         
         # mash together gadget directory output and file prefix
-        changa_parameters['achOutFile'] = gadget_params['OutputDir'] + '/' + gadget_params['SnapshotFileBase']
+        _ = gadget_params['OutputDir'] + '/'
+        changa_params['achOutFile'] = _ + gadget_params['SnapshotFileBase']
         
         # wall runtime limit seconds to minutes
-        changa_parameters['iWallRunTime'] = int(float(gadget_params['TimeLimitCPU']) / 60.0)
+        changa_params['iWallRunTime'] = int(float(gadget_params['TimeLimitCPU']) / 60.0)
         
         # simulation start step
-        _ = float(gadget_params['TimeBegin']) / float(changa_parameters['dDelta'])
-        changa_parameters['iStartStep'] = math.floor(_)
+        _ = float(gadget_params['TimeBegin']) / float(changa_params['dDelta'])
+        changa_params['iStartStep'] = math.floor(_)
         
         # number of simulation steps
         _ = float(gadget_params['TimeMax']) - float(gadget_params['TimeBegin'])
-        _ /= float(changa_parameters['dDelta'])
-        changa_parameters['nSteps'] = math.ceil(_)
+        _ /= float(changa_params['dDelta'])
+        changa_params['nSteps'] = math.ceil(_)
 
         # output writing interval
-        _ = float(gadget_params['TimeBetSnapshot']) / float(changa_parameters['dDelta'])
-        changa_parameters['iOutInterval'] = math.ceil(_)
+        _ = float(gadget_params['TimeBetSnapshot']) / float(changa_params['dDelta'])
+        changa_params['iOutInterval'] = math.ceil(_)
         
         # output to log file interval
-        _ = float(gadget_params['TimeBetStatistics']) / float(changa_parameters['dDelta'])
-        changa_parameters['iLogInterval'] = math.floor(_)
+        _ = float(gadget_params['TimeBetStatistics']) / float(changa_params['dDelta'])
+        changa_params['iLogInterval'] = math.floor(_)
         
         # factor difference for Eta parameter
-        changa_parameters['dEta'] = math.sqrt(2.0 * float(gadget_params['ErrTolIntAccuracy']))
+        _ = 2.0 * float(gadget_params['ErrTolIntAccuracy'])
+        changa_params['dEta'] = math.sqrt(_)
         
         # gadget courant factor is half of normal
-        changa_parameters['dEtaCourant'] = 2.0 * float(gadget_params['CourantFac'])
+        changa_params['dEtaCourant'] = 2.0 * float(gadget_params['CourantFac'])
         
         # convert cm to kpc
         unitlength = float(gadget_params['UnitLength_in_cm']) * u.cm
         dKpcUnit = unitlength.to(u.kpc) / u.kpc
-        changa_parameters['dKpcUnit'] = dKpcUnit
+        changa_params['dKpcUnit'] = dKpcUnit
         
         # convert mass to solar masses
-        unitmass = float(gadget_params['UnitMass_in_g']) * u.g
         unitvelocity = float(gadget_params['UnitVelocity_in_cm_per_s']) * u.cm / u.s
-        dMsolUnit = ((((dKpcUnit * u.kpc).to(u.m)) ** 3 / (unitlength / unitvelocity) ** 2 ) / G ).to(u.Msun) / u.Msun
+        unittime = unitlength / unitvelocity
+        m = (dKpcUnit * u.kpc).to(u.m) ** 3 / t ** 2 / G
+        dMsolUnit = m.to(u.Msun) / u.Msun
+        unitmass = float(gadget_params['UnitMass_in_g']) * u.g
         mass_convert_factor = (dMsolUnit * u.Msun) / unitmass.to(u.Msun)
-        changa_parameters['dMsolUnit'] = dMsolUnit
+        changa_params['dMsolUnit'] = dMsolUnit
 
-        return changa_parameters, mass_convert_factor
+        return changa_params, mass_convert_factor

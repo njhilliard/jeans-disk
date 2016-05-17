@@ -9,15 +9,19 @@ class gadget_particles:
         self.velocities = np.empty(data['Velocities'].shape, data['Velocities'].dtype)
         data['Velocities'].read_direct(self.velocities)
         
-        self.mass = mass        
-        if (self.mass <= 0):
+        self.size = self.positions.shape[0]
+        
+        if (float(mass) <= 0.0):
             self.mass = np.empty(data['Masses'].shape, data['Masses'].dtype)
             data['Masses'].read_direct(self.mass)
+        else:
+            self.mass = float(mass) * np.ones(self.size, dtype=np.float32)
 
-        self.metals = None       
         if read_metals:
             self.metals = np.empty(data['metals'].shape, data['metals'].dtype)
             data['metals'].read_direct(self.metals)
+        else:
+            self.metals = np.zeros(self.size, dtype=np.float32)
 
 class gadget_gas_particles(gadget_particles):
     def __init__(self, data, header):
@@ -29,24 +33,27 @@ class gadget_gas_particles(gadget_particles):
         self.density = np.empty(data['Density'].shape, data['Density'].dtype)
         data['Density'].read_direct(self.density)
 
-        self.electron_density = 1.0
-        self.hsml = 1.0
         if header.attrs['Flag_Cooling']:
             self.electron_density = np.empty(data['ElectronAbundance'].shape, data['ElectronAbundance'].dtype)
             data['ElectronAbundance'].read_direct(self.electron_density)
             
             self.hsml = np.empty(data['hsml'].shape, data['hsml'].dtype)
             data['hsml'].read_direct(self.hsml)
+        else:
+            self.electron_density = np.ones(self.size, dtype=np.float32)
+            self.hsml = np.ones(self.size, dtype=np.float32)
         
-        self.t_form = None
         if header.attrs['Flag_StellarAge']:
             self.t_form = np.empty(data['t_form'].shape, data['t_form'].dtype)
             data['t_form'].read_direct(self.t_form)
-        
-        self.metals = None
+        else:
+            self.t_form = np.zeros(self.size, dtype=np.float32)
+
         if header.attrs['Flag_Metals']:
             self.metals = np.empty(data['metals'].shape, data['metals'].dtype)
             data['metals'].read_direct(self.metals)
+        else:
+            self.metals = np.zeros(self.size, dtype=np.float32)
 
 class File:
     def __init__(self, fname):

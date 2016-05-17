@@ -1,10 +1,10 @@
 import gadget
 import math
 from astropy import units as u
-from astropy.constants import G
+from astropy.constants import G as G_u
 
+# Translation table between GADGET and ChaNGa parameter names
 gadget_trans_table = {
-    """Translation table between GADGET and ChaNGa parameter names"""
     'InitCondFile'          : 'achInFile',
     'SnapshotFileBase'      : 'achOutFile',
     'TimeLimitCPU'          : 'iWallRunTime',
@@ -40,7 +40,7 @@ def convert_parameter_file(gadget_params):
         
         # Translate GADGET parameters into ChaNGa parameters
         changa_params = {}
-        for k,v in gadget_params.items():
+        for k, v in gadget_params.items():
             if k in gadget_trans_table:
                 changa_params[gadget_trans_table[k]] = v
         
@@ -83,7 +83,7 @@ def convert_parameter_file(gadget_params):
         # convert mass to solar masses
         unitvelocity = float(gadget_params['UnitVelocity_in_cm_per_s']) * u.cm / u.s
         unittime = unitlength / unitvelocity
-        m = (dKpcUnit * u.kpc).to(u.m) ** 3 / t ** 2 / G
+        m = (dKpcUnit * u.kpc).to(u.m) ** 3 / unittime ** 2 / G_u
         dMsolUnit = m.to(u.Msun) / u.Msun
         unitmass = float(gadget_params['UnitMass_in_g']) * u.g
         mass_convert_factor = (dMsolUnit * u.Msun) / unitmass.to(u.Msun)

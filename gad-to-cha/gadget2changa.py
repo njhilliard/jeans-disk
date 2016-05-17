@@ -15,22 +15,21 @@ def get_output_file(file_name):
     return input_dir + input_file_basename
 
 parser = argparse.ArgumentParser(description='Convert GADGET2 files to ChaNGa files')
-parser.add_argument('gadget_file', metavar='GADGET', nargs=1, help='GADGET2 HDF5 file to convert')
-parser.add_argument('param_file', metavar='Parameter', nargs=1, help='GADGET2 parameter file to convert')
+parser.add_argument('gadget_file', metavar='GADGET', help='GADGET2 HDF5 file to convert')
+parser.add_argument('param_file', metavar='Parameter', help='GADGET2 parameter file to convert')
 parser.add_argument('--convert_bh', action='store_true', help='Treat boundary particles as black holes')
 args = parser.parse_args()
 
 output_file = get_output_file(args.gadget_file) + '.tipsy'
 gadget_file = gadget.File(args.gadget_file)
-gadget_params = gadget.Parameter_file(args.param_file)
+# gadget_params = gadget.Parameter_file(args.param_file)
 # changa_params, mass_factor = ChaNGa.convert_parameter_file(gadget_params)
  
 # Output the parameter file
-with open(output_parameter_filename, 'w') as f:
-     for k,v in changa_params.items():
-         f.write('{0:20s}'.format(k))
-         f.write('{0:10s}'.format(v))
- 
+# with open('ChaNGa.params', 'w') as f:
+#      for k in sorted(changa_params):
+#          f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
+
 # tipsy_file = tipsy.File()
 # tipsy_file.convert(gadget_params, gadget_file, mass_factor, args.convert_bh)
 # tipsy_file.save(output_file)

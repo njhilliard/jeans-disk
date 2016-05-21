@@ -1,5 +1,11 @@
-.project
-.pydevproject
 __pycache__
 *.pyc
 gad-to-cha/ChaNGa.params
+*.o
+*.so
+
+# Eclipse folders
+.project
+.pydevproject
+.cproject
+.settings

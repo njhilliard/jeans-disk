@@ -46,5 +46,6 @@ int tipsy_write_header(double, int, int, int);
 int tipsy_write_star_particles(float*, float**, float**, float*, float*, float, size_t);
 int tipsy_write_dark_particles(float*, float**, float**, float, size_t);
 int tipsy_write_gas_particles(float*, float**, float**, float*, float*, float*, float*, size_t);
+int tipsy_write_blackhole_particles(float*, float**, float**, float, size_t);
 
 #endif

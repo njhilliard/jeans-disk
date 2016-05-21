@@ -130,3 +130,30 @@ int tipsy_write_gas_particles(float *mass, float **pos, float **vel, float *rho,
 
 	return 0;
 }
+
+int tipsy_write_blackhole_particles(float *mass, float **pos, float **vel,
+		float softening, size_t size) {
+
+	if (!fd)
+		return -1;
+
+	tipsy_star_particle p;
+	for (size_t i = 0; i < size; ++i) {
+		p.mass = mass[i] * mass_scale;
+		p.pos[0] = pos[i][0];
+		p.pos[1] = pos[i][1];
+		p.pos[2] = pos[i][2];
+		p.vel[0] = vel[i][0] * velocity_scale;
+		p.vel[1] = vel[i][1] * velocity_scale;
+		p.vel[2] = vel[i][2] * velocity_scale;
+		p.softening = softening;
+		p.metals = 0.0;		// These are not stars in GADGET, so there is no metalicity
+		p.tform = -1.0;		// Negative tForm signals black hole to GASOLINE
+		p.phi = 0.0f;
+
+		if (fwrite(&p, sizeof(tipsy_star_particle), 1, fd) != 1) {
+			return errno;
+		}
+	}
+	return 0;
+}

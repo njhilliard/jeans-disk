@@ -22,18 +22,16 @@ parser.add_argument('--convert_bh', action='store_true', help='Treat boundary pa
 parser.add_argument('--preserve_boundary_softening', action='store_true', help='Preserve softening lengths for boundary particles')
 args = parser.parse_args()
 
-output_file = get_output_file(args.gadget_file) + '.tipsy'
+output_file = get_output_file(args.gadget_file)
 
 gadget_file = gadget.File(args.gadget_file)
 gadget_params = gadget.Parameter_file(args.param_file)
-
-# TODO: put ChaNGa parameter file in same directory as GADGET param file
 changa_params, mass_factor = ChaNGa.convert_parameter_file(gadget_params)
 
 #Output the parameter file
-with open('ChaNGa.params', 'w') as f:
+with open(output_file + '.ChaNGa.params', 'w') as f:
      for k in sorted(changa_params):
          f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
 
 tipsy_file = tipsy.gadget_converter(gadget_params, gadget_file, mass_factor, args.convert_bh, args.preserve_boundary_softening)
-tipsy_file.save(output_file)
+tipsy_file.save(output_file + '.tipsy')

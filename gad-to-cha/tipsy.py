@@ -2,7 +2,8 @@ import gadget
 import astropy.units as apu
 import astropy.constants as apc
 import math
-import struct
+import numpy as np
+import tipsy_file
 
 # Some useful astronomy constants in cgs units
 constants = {
@@ -14,30 +15,6 @@ constants = {
     'h_massfrac'    : 0.76
 }
 
-def dark_particle(mass, pos, vel, softening):
-    return struct.pack('fffffffff', mass,
-                       pos[0], pos[1], pos[2],
-                       vel[0], vel[1], vel[2],
-                       softening, 0.0)
-
-def star_particle(mass, pos, vel, metals, tform, softening):
-    return struct.pack('fffffffffff', mass,
-                       pos[0], pos[1], pos[2],
-                       vel[0], vel[1], vel[2],
-                       metals, tform,
-                       softening, 0.0)
-
-def gas_particle(mass, pos, vel, rho, temp, hsmooth, metals):
-    return struct.pack('ffffffffffff', mass,
-                       pos[0], pos[1], pos[2],
-                       vel[0], vel[1], vel[2],
-                       rho, temp, hsmooth,
-                       metals, 0.0)
-
-def header(time, nsph, ndark, nstar):
-    total = nsph + ndark + nstar
-    return struct.pack('diiiii', time, total, 3, nsph, ndark, nstar)
-
 class gadget_converter():
     def __init__(self, gadget_params, gadget_file, mass_conversion_factor, convert_bh=False, preserve_bndry_softening=False):
         if not isinstance(gadget_file, gadget.File):
@@ -48,7 +25,7 @@ class gadget_converter():
 
         self.convert_bh = convert_bh
         self.preserve_bndry_softening = preserve_bndry_softening
-        self.mass_conversion_factor = float(mass_conversion_factor)
+        self.mass_scale = float(mass_conversion_factor)
         self.time = float(gadget_file.header['Time'])
         self.redshift = float(gadget_file.header['Redshift'])
         self.is_cosmological = int(gadget_params['ComovingIntegrationOn']) == 1
@@ -109,90 +86,67 @@ class gadget_converter():
 
     
     def save(self, filename):
-        # Gadget units have an extra sqrt(a) in the internal velocities
-        vscale = math.sqrt(1.0 + self.redshift)
-
         ngas, ndark, nstar = 0, 0, 0
         
-        with open(filename, 'wb') as file:
+        with tipsy_file.streaming_writer(filename) as file:
+            # Gadget units have an extra sqrt(a) in the internal velocities
+            file.set_velocity_scale(math.sqrt(1.0 + self.redshift))
+            
+            file.set_mass_scale(self.mass_scale)
+            
             # just a placeholder
-            file.write(header(self.time, ngas, ndark, nstar))
+            file.write_header(self.time, ngas, ndark, nstar)
             
             if self.halo is not None:
                 ndark += self.halo.size
-                for i in range(self.halo.size):
-                    file.write(dark_particle(self.halo.mass[i] * self.mass_conversion_factor,
-                                             self.halo.positions[i, :],
-                                             self.halo.velocities[i, :] * vscale,
-                                             self.halo.softening))
-            
+                file.write_dark(self.halo.mass, self.halo.positions,
+                                self.halo.velocities, self.halo.softening)
+                
             # In ChaNGa, cosmological simulations treat disk and bulge particles
             # as dark matter particles
             if self.is_cosmological:
                 if self.disk is not None:
                     ndark += self.disk.size
-                    for i in range(self.disk.size):
-                        file.write(dark_particle(self.disk.mass[i] * self.mass_conversion_factor,
-                                                 self.disk.positions[i, :],
-                                                 self.disk.velocities[i, :] * vscale,
-                                                 self.disk.softening))
+                    file.write_dark(self.disk.mass, self.disk.positions,
+                                    self.disk.velocities, self.disk.softening)
                 
                 if self.bulge is not None:
                     ndark += self.bulge.size
-                    for i in range(self.bulge.size):
-                        file.write(dark_particle(self.bulge.mass[i] * self.mass_conversion_factor,
-                                                 self.bulge.positions[i, :],
-                                                 self.bulge.velocities[i, :] * vscale,
-                                                 self.bulge.softening))
+                    file.write_dark(self.bulge.mass, self.bulge.positions,
+                                    self.bulge.velocities, self.bulge.softening)
             else:
                 if self.disk is not None:
                     nstar += self.disk.size
-                    for i in range(self.disk.size):
-                        file.write(star_particle(self.disk.mass[i] * self.mass_conversion_factor,
-                                                 self.disk.positions[i, :],
-                                                 self.disk.velocities[i, :] * vscale,
-                                                 self.disk.metals[i],
-                                                 self.disk.t_form[i],
-                                                 self.disk.softening))
+                    file.write_star(self.disk.mass, self.disk.positions,
+                                    self.disk.velocities, self.disk.metals,
+                                    self.disk.t_form, self.disk.softening)
                 
                 if self.bulge is not None:
                     nstar += self.bulge.size
-                    for i in range(self.bulge.size):
-                        file.write(star_particle(self.bulge.mass[i] * self.mass_conversion_factor,
-                                                 self.bulge.positions[i, :],
-                                                 self.bulge.velocities[i, :] * vscale,
-                                                 self.bulge.softening))
+                    file.write_star(self.bulge.mass, self.bulge.positions,
+                                    self.bulge.velocities, self.bulge.softening)
     
+            # Convert boundary particles to dark matter particles
             if self.boundary is not None and not self.convert_bh:
                 ndark += self.boundary.size
                 eps = self.halo.softening
                 if not self.preserve_bndry_softening:
                     eps = self.boundary.softening
-                for i in range(self.boundary.size):
-                    file.write(dark_particle(self.boundary.mass[i] * self.mass_conversion_factor,
-                                             self.boundary.positions[i],
-                                             self.boundary.velocities[i] * vscale,
-                                             eps))
-            
+                file.write_dark(self.boundary.mass, self.boundary.positions,
+                                self.boundary.velocities, eps)
+
             if self.star is not None:
-                for i in range(self.star):
-                    nstar += self.star.size
-                    file.write(star_particle(self.star.mass[i] * self.mass_conversion_factor,
-                                             self.star.positions[i],
-                                             self.star.velocities[i] * vscale,
-                                             self.star.metals[i],
-                                             self.star.t_form[i],
-                                             self.star.softening))
+                nstar += self.star.size
+                file.write_star(self.star.mass, self.star.positions,
+                                self.star.velocities, self.star.metals,
+                                self.star.t_form, self.star.softening)
             
+            # Convert boundary particles to black holes
             if self.boundary is not None and self.convert_bh:
                 nstar += self.boundary.size
-                file.write(star_particle(self.boundary.mass[i] * self.mass_conversion_factor,
-                                         self.boundary.positions[i],
-                                         self.boundary.velocities[i] * vscale,
-                                         0.0,  # These are not stars in GADGET, so there is no metalicity
-                                         -1.0,  # Negative tForm signals black hole to GASOLINE
-                                         self.boundary.softening))
+                file.write_star(self.boundary.mass, self.boundary.positions,
+                                self.boundary.velocities, self.boundary.softening)
        
         # update the header
-        with open(filename, 'r+b') as file:
-            file.write(header(self.time, ngas, ndark, nstar))
+        with tipsy_file.streaming_writer(filename, 'r+b') as file:
+            file.write_header(self.time, ngas, ndark, nstar)

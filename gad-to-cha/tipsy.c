@@ -7,11 +7,19 @@ static FILE* fd = NULL;
 static float velocity_scale = 1.0f;
 static float mass_scale = 1.0f;
 
-int tipsy_open_file(const char *filename) {
+void tipsy_set_velocity_scale(float vs) {
+	velocity_scale = vs;
+}
+
+void tipsy_set_mass_scale(float ms) {
+	mass_scale = ms;
+}
+
+int tipsy_open_file(const char *filename, const char *mode) {
 	if (fd)
 		return -1;
 
-	fd = fopen(filename, "wb");
+	fd = fopen(filename, mode);
 
 	if (!fd)
 		return -1;
@@ -20,19 +28,10 @@ int tipsy_open_file(const char *filename) {
 }
 
 void tipsy_close_file() {
-	if (fd)
+	if (fd) {
 		fclose(fd);
-}
-
-int tipsy_init(const char* filename, float vscale, float mscale) {
-	if (tipsy_open_file(filename)) {
-		return -1;
+		fd = NULL;
 	}
-
-	velocity_scale = vscale;
-	mass_scale = mscale;
-
-	return 0;
 }
 
 int tipsy_write_header(double time, int ngas, int ndark, int nstar) {
@@ -47,7 +46,7 @@ int tipsy_write_header(double time, int ngas, int ndark, int nstar) {
 	return 0;
 }
 
-int tipsy_write_star_particles(float *mass, float **pos, float **vel,
+int tipsy_write_star_particles(float *mass, float (*pos)[3], float (*vel)[3],
 		float *metals, float *tform, float softening, size_t size) {
 
 	if (!fd)
@@ -76,7 +75,7 @@ int tipsy_write_star_particles(float *mass, float **pos, float **vel,
 
 }
 
-int tipsy_write_dark_particles(float *mass, float **pos, float **vel,
+int tipsy_write_dark_particles(float *mass, float (*pos)[3], float (*vel)[3],
 		float softening, size_t size) {
 
 	if (!fd)
@@ -102,7 +101,7 @@ int tipsy_write_dark_particles(float *mass, float **pos, float **vel,
 	return 0;
 }
 
-int tipsy_write_gas_particles(float *mass, float **pos, float **vel, float *rho,
+int tipsy_write_gas_particles(float *mass, float (*pos)[3], float (*vel)[3], float *rho,
 		float *temp, float *hsmooth, float *metals, size_t size) {
 
 	if (!fd)
@@ -131,7 +130,7 @@ int tipsy_write_gas_particles(float *mass, float **pos, float **vel, float *rho,
 	return 0;
 }
 
-int tipsy_write_blackhole_particles(float *mass, float **pos, float **vel,
+int tipsy_write_blackhole_particles(float *mass, float (*pos)[3], float (*vel)[3],
 		float softening, size_t size) {
 
 	if (!fd)

@@ -39,13 +39,14 @@ typedef struct {
 	int nstar;
 } tipsy_header;
 
-int tipsy_init(const char*, float, float);
-int tipsy_open_file(const char*);
+void set_velocity_scale(float);
+void set_mass_scale(float);
+int tipsy_open_file(const char*, const char*);
 void tipsy_close_file();
 int tipsy_write_header(double, int, int, int);
-int tipsy_write_star_particles(float*, float**, float**, float*, float*, float, size_t);
-int tipsy_write_dark_particles(float*, float**, float**, float, size_t);
-int tipsy_write_gas_particles(float*, float**, float**, float*, float*, float*, float*, size_t);
-int tipsy_write_blackhole_particles(float*, float**, float**, float, size_t);
+int tipsy_write_star_particles(float*, float(*)[3], float(*)[3], float*, float*, float, size_t);
+int tipsy_write_dark_particles(float*, float(*)[3], float(*)[3], float, size_t);
+int tipsy_write_gas_particles(float*, float(*)[3], float(*)[3], float*, float*, float*, float*, size_t);
+int tipsy_write_blackhole_particles(float*, float(*)[3], float(*)[3], float, size_t);
 
 #endif

@@ -28,10 +28,16 @@ gadget_file = gadget.File(args.gadget_file)
 gadget_params = gadget.Parameter_file(args.param_file)
 changa_params, mass_factor = ChaNGa.convert_parameter_file(gadget_params)
 
+tipsy_file = tipsy.gadget_converter(gadget_params, gadget_file, mass_factor, args.convert_bh, args.preserve_boundary_softening)
+
+if tipsy_file.gas is not None:
+    changa_params['bDoGas'] = 1
+else:
+    changa_params['bDoGas'] = 0
+
 #Output the parameter file
 with open(output_file + '.ChaNGa.params', 'w') as f:
      for k in sorted(changa_params):
          f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
 
-tipsy_file = tipsy.gadget_converter(gadget_params, gadget_file, mass_factor, args.convert_bh, args.preserve_boundary_softening)
 tipsy_file.save(output_file + '.tipsy')

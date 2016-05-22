@@ -84,7 +84,6 @@ class gadget_converter():
                                      constants['gamma_minus1'] * units['Energy_in_cgs'] / 
                                      units['Mass_in_g'])
 
-    
     def save(self, filename):
         ngas, ndark, nstar = 0, 0, 0
         

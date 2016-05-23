@@ -62,6 +62,7 @@ class gadget_converter():
             self.gas.temperature = np.copy(gadget_file.gas.internal_energy)
             
             # Convert temperature to Kelvin
+            print('Converting internal energy to temperature assuming a gamma=5/3 gas')
             mean_weight = (4.0 / 
                            (3 * constants['h_massfrac'] + 1 + 
                             4 * constants['h_massfrac'] * self.gas.electron_density

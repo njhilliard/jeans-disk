@@ -44,9 +44,9 @@ void set_mass_scale(float);
 int tipsy_open_file(const char*, const char*);
 void tipsy_close_file();
 int tipsy_write_header(double, int, int, int);
-int tipsy_write_star_particles(float*, float(*)[3], float(*)[3], float*, float*, float, size_t);
-int tipsy_write_dark_particles(float*, float(*)[3], float(*)[3], float, size_t);
-int tipsy_write_gas_particles(float*, float(*)[3], float(*)[3], float*, float*, float*, float*, size_t);
-int tipsy_write_blackhole_particles(float*, float(*)[3], float(*)[3], float, size_t);
+int tipsy_write_star_particles(const float*, const float(*)[3], const float(*)[3], const float*, const float*, float, size_t);
+int tipsy_write_dark_particles(const float*, const float(*)[3], const float(*)[3], float, size_t);
+int tipsy_write_gas_particles(const float*, const float(*)[3], const float(*)[3], const float*, const float*, const float*, const float*, size_t);
+int tipsy_write_blackhole_particles(const float*, const float(*)[3], const float(*)[3], float, size_t);
 
 #endif

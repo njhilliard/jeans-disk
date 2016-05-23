@@ -46,8 +46,8 @@ int tipsy_write_header(double time, int ngas, int ndark, int nstar) {
 	return 0;
 }
 
-int tipsy_write_star_particles(float *mass, float (*pos)[3], float (*vel)[3],
-		float *metals, float *tform, float softening, size_t size) {
+int tipsy_write_star_particles(const float *mass, const float (*pos)[3], const float (*vel)[3],
+		const float *metals, const float *tform, float softening, size_t size) {
 
 	if (!fd)
 		return -1;
@@ -75,7 +75,7 @@ int tipsy_write_star_particles(float *mass, float (*pos)[3], float (*vel)[3],
 
 }
 
-int tipsy_write_dark_particles(float *mass, float (*pos)[3], float (*vel)[3],
+int tipsy_write_dark_particles(const float *mass, const float (*pos)[3], const float (*vel)[3],
 		float softening, size_t size) {
 
 	if (!fd)
@@ -101,8 +101,8 @@ int tipsy_write_dark_particles(float *mass, float (*pos)[3], float (*vel)[3],
 	return 0;
 }
 
-int tipsy_write_gas_particles(float *mass, float (*pos)[3], float (*vel)[3], float *rho,
-		float *temp, float *hsmooth, float *metals, size_t size) {
+int tipsy_write_gas_particles(const float *mass, const float (*pos)[3], const float (*vel)[3], const float *rho,
+		const float *temp, const float *hsmooth, const float *metals, size_t size) {
 
 	if (!fd)
 		return -1;
@@ -130,8 +130,8 @@ int tipsy_write_gas_particles(float *mass, float (*pos)[3], float (*vel)[3], flo
 	return 0;
 }
 
-int tipsy_write_blackhole_particles(float *mass, float (*pos)[3], float (*vel)[3],
-		float softening, size_t size) {
+int tipsy_write_blackhole_particles(const float *mass, const float (*pos)[3], const float (*vel)[3],
+		const float softening, size_t size) {
 
 	if (!fd)
 		return -1;

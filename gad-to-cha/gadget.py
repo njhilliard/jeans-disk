@@ -21,15 +21,15 @@ class gadget_particle_with_metals(gadget_particle):
     def __init__(self, data, mass, header):
         super(self.__class__, self).__init__(data, mass, header)
         
-        if header['Flag_StellarAge']:
-            self.t_form = np.empty(data['t_form'].shape, data['t_form'].dtype)
-            data['t_form'].read_direct(self.t_form)
+        if header['Flag_Sfr'] and header['Flag_StellarAge']:
+            self.t_form = np.empty(data['StarFormationTime'].shape, data['StarFormationTime'].dtype)
+            data['StarFormationTime'].read_direct(self.t_form)
         else:
             self.t_form = np.zeros(self.size, dtype=np.float32)
-
-        if header['Flag_Metals']:
-            self.metals = np.empty(data['metals'].shape, data['metals'].dtype)
-            data['metals'].read_direct(self.metals)
+    
+        if header['Flag_Sfr'] and header['Flag_Metals']:
+            self.metals = np.empty(data['Metallicity'].shape, data['Metallicity'].dtype)
+            data['Metallicity'].read_direct(self.metals)
         else:
             self.metals = np.zeros(self.size, dtype=np.float32)
 
@@ -37,21 +37,20 @@ class gadget_gas_particle(gadget_particle_with_metals):
     def __init__(self, data, mass, header):
         super(self.__class__, self).__init__(data, mass, header)
 
-        self.internal_energy = np.empty(data['internal_energy'].shape, data['internal_energy'].dtype)
-        data['internal_energy'].read_direct(self.internal_energy)
+        self.internal_energy = np.empty(data['InternalEnergy'].shape, data['InternalEnergy'].dtype)
+        data['InternalEnergy'].read_direct(self.internal_energy)
         
         self.density = np.empty(data['Density'].shape, data['Density'].dtype)
         data['Density'].read_direct(self.density)
+        
+        self.hsml = np.empty(data['SmoothingLength'].shape, data['SmoothingLength'].dtype)
+        data['SmoothingLength'].read_direct(self.hsml)
 
         if header['Flag_Cooling']:
             self.electron_density = np.empty(data['ElectronAbundance'].shape, data['ElectronAbundance'].dtype)
             data['ElectronAbundance'].read_direct(self.electron_density)
-            
-            self.hsml = np.empty(data['hsml'].shape, data['hsml'].dtype)
-            data['hsml'].read_direct(self.hsml)
         else:
             self.electron_density = np.ones(self.size, dtype=np.float32)
-            self.hsml = np.ones(self.size, dtype=np.float32)
 
 class File:
     def __init__(self, fname):

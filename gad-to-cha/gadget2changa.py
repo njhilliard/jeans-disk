@@ -20,20 +20,31 @@ parser.add_argument('gadget_file', metavar='GADGET', help='GADGET2 HDF5 file to 
 parser.add_argument('param_file', metavar='Parameter', help='GADGET2 parameter file to convert')
 parser.add_argument('--convert_bh', action='store_true', help='Treat boundary particles as black holes')
 parser.add_argument('--preserve_boundary_softening', action='store_true', help='Preserve softening lengths for boundary particles')
+parser.add_argument('--no_param_list', action='store_true', help='Do not store a complete list ChaNGa parameters in "param_file"')
 args = parser.parse_args()
 
-output_file = get_output_file(args.gadget_file) + '.tipsy'
+output_file = get_output_file(args.gadget_file)
 
 gadget_file = gadget.File(args.gadget_file)
 gadget_params = gadget.Parameter_file(args.param_file)
-
-# TODO: put ChaNGa parameter file in same directory as GADGET param file
 changa_params, mass_factor = ChaNGa.convert_parameter_file(gadget_params)
 
+tipsy_file = tipsy.gadget_converter(gadget_params, gadget_file, mass_factor, args.convert_bh, args.preserve_boundary_softening)
+ 
+if tipsy_file.gas is not None:
+    changa_params['bDoGas'] = 1
+else:
+    changa_params['bDoGas'] = 0
+
 #Output the parameter file
-with open('ChaNGa.params', 'w') as f:
+with open(output_file + '.ChaNGa.params', 'w') as f:
      for k in sorted(changa_params):
          f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
 
-tipsy_file = tipsy.gadget_converter(gadget_params, gadget_file, mass_factor, args.convert_bh, args.preserve_boundary_softening)
-tipsy_file.save(output_file)
+if not args.no_param_list:
+    with open(output_file + '.ChaNGa.params', 'a') as f:
+        f.write('\n# Complete parameter list below\n')
+        for k in sorted(ChaNGa.all_parameters):
+            f.write('#{0:30s}{1:s}\n'.format(k, ChaNGa.all_parameters[k]))
+             
+tipsy_file.save(output_file + '.tipsy')

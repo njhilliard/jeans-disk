@@ -31,10 +31,7 @@ changa_params, mass_factor = ChaNGa.convert_parameter_file(gadget_params)
 
 tipsy_file = tipsy.gadget_converter(gadget_params, gadget_file, mass_factor, args.convert_bh, args.preserve_boundary_softening)
  
-if tipsy_file.gas is not None:
-    changa_params['bDoGas'] = 1
-else:
-    changa_params['bDoGas'] = 0
+changa_params['bDoGas'] = int(tipsy_file.gas is not None)
 
 #Output the parameter file
 with open(output_file + '.ChaNGa.params', 'w') as f:

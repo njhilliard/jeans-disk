@@ -13,3 +13,5 @@ gad-to-cha/ChaNGa.params
 # test files
 test.cpp
 test.py
+GADGET/
+ChaNGa/

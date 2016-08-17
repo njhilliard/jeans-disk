@@ -9,3 +9,7 @@ gad-to-cha/ChaNGa.params
 .pydevproject
 .cproject
 .settings
+
+# test files
+test.cpp
+test.py

@@ -49,8 +49,8 @@ typedef enum {
 	TIPSY_WRITE_UNOPENED 	= -3, /* Write to unopened file */
 } tipsy_error;
 
-void set_velocity_scale(float);
-void set_mass_scale(float);
+void tipsy_set_velocity_scale(float);
+void tipsy_set_mass_scale(float);
 int tipsy_open_file(const char*, const char*);
 void tipsy_close_file();
 int tipsy_write_header(double, int, int, int);

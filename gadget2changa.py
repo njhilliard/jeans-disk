@@ -18,9 +18,9 @@ def get_output_file(file_name):
 parser = argparse.ArgumentParser(description='Convert GADGET2 files to ChaNGa files')
 parser.add_argument('gadget_file', metavar='GADGET', help='GADGET2 HDF5 file to convert')
 parser.add_argument('param_file', metavar='Parameter', help='GADGET2 parameter file to convert')
-parser.add_argument('--convert_bh', action='store_true', help='Treat boundary particles as black holes')
-parser.add_argument('--preserve_boundary_softening', action='store_true', help='Preserve softening lengths for boundary particles')
-parser.add_argument('--no_param_list', action='store_true', help='Do not store a complete list ChaNGa parameters in "param_file"')
+parser.add_argument('--convert-bh', action='store_true', help='Treat boundary particles as black holes')
+parser.add_argument('--preserve-boundary-softening', action='store_true', help='Preserve softening lengths for boundary particles')
+parser.add_argument('--no-param-list', action='store_true', help='Do not store a complete list ChaNGa parameters in "param_file"')
 args = parser.parse_args()
 
 output_file = get_output_file(args.gadget_file)

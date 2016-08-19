@@ -18,10 +18,10 @@ constants = {
 class gadget_converter():
     def __init__(self, gadget_params, gadget_file, mass_conversion_factor, convert_bh=False, preserve_bndry_softening=False):
         if not isinstance(gadget_file, gadget.File):
-            raise ValueError("input file must be a gadget.File")
+            raise TypeError("input file must be a gadget.File")
         
         if not isinstance(gadget_params, gadget.Parameter_file):
-            raise ValueError("input file must be a gadget.Parameter_file")
+            raise TypeError("input file must be a gadget.Parameter_file")
 
         self.convert_bh = convert_bh
         self.preserve_bndry_softening = preserve_bndry_softening

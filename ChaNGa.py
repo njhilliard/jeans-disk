@@ -36,7 +36,7 @@ def convert_parameter_file(gadget_params):
         """Convert parameter values"""
         
         if not isinstance(gadget_params, gadget.Parameter_file):
-            raise ValueError("parameter file is not a 'gadget.Parameter_file'")
+            raise TypeError("parameter file is not a 'gadget.Parameter_file'")
         
         # Translate GADGET parameters into ChaNGa parameters
         changa_params = {}

@@ -1,6 +1,15 @@
 #pragma once
 
 typedef struct {
+	double time;
+	int nbodies;
+	int ndim;
+	int ngas;
+	int ndark;
+	int nstar;
+} tipsy_header;
+
+typedef struct {
 	float mass;
 	float pos[3];
 	float vel[3];
@@ -30,22 +39,15 @@ typedef struct {
 } tipsy_star_particle;
 
 typedef struct {
-	double time;
-	int nbodies;
-	int ndim;
-	int ngas;
-	int ndark;
-	int nstar;
-} tipsy_header;
-
-typedef struct {
 	float *mass;
 	float (*pos)[3];
 	float (*vel)[3];
 	float *rho;
 	float *temp;
 	float *metals;
+	float *hsmooth;
 	float *phi;
+	float soft;
 	size_t size;
 } tipsy_gas_data;
 
@@ -54,6 +56,7 @@ typedef struct {
 	float (*pos)[3];
 	float (*vel)[3];
 	float *phi;
+	float soft;
 	size_t size;
 } tipsy_dark_data;
 
@@ -64,5 +67,15 @@ typedef struct {
 	float *metals;
 	float *tform;
 	float *phi;
+	float soft;
 	size_t size;
 } tipsy_star_data;
+
+typedef struct {
+	float *mass;
+	float (*pos)[3];
+	float (*vel)[3];
+	float *phi;
+	float soft;
+	size_t size;
+} tipsy_blackhole_data;

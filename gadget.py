@@ -21,8 +21,8 @@ class gadget_particle_with_metals(gadget_particle):
     def __init__(self, data, mass, header):
         
         if header['Flag_Sfr'] and header['Flag_StellarAge']:
-            self.t_form = np.empty(data['StarFormationTime'].shape, data['StarFormationTime'].dtype)
-            data['StarFormationTime'].read_direct(self.t_form)
+            self.t_form = np.empty(data['StellarFormationTime'].shape, data['StellarFormationTime'].dtype)
+            data['StellarFormationTime'].read_direct(self.t_form)
         else:
             self.t_form = np.zeros(self.size, dtype=np.float32)
     

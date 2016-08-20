@@ -5,17 +5,17 @@ import math
 import numpy as np
 import tipsy_file
 
-# Some useful astronomy constants in cgs units
-constants = {
-    'gravity'       : apc.G.cgs.value,
-    'boltzmann'     : apc.k_B.cgs.value,
-    'protonmass'    : apc.m_p.cgs.value,
-    'sec_per_myr'   : apu.yr.to(apu.s) * 1e6,
-    'gamma_minus1'  : (5.0 / 3.0) - 1.0,
-    'h_massfrac'    : 0.76
-}
-
 class gadget_converter():
+    # Some useful astronomy constants in cgs units
+    constants = {
+        'gravity'       : apc.G.cgs.value,
+        'boltzmann'     : apc.k_B.cgs.value,
+        'protonmass'    : apc.m_p.cgs.value,
+        'sec_per_myr'   : apu.yr.to(apu.s) * 1e6,
+        'gamma_minus1'  : (5.0 / 3.0) - 1.0,
+        'h_massfrac'    : 0.76
+    }
+
     def __init__(self, gadget_params, gadget_file, mass_conversion_factor, convert_bh=False, preserve_bndry_softening=False):
         if not isinstance(gadget_file, gadget.File):
             raise TypeError("input file must be a gadget.File")
@@ -59,7 +59,6 @@ class gadget_converter():
         if gadget_file.gas is not None:
             self.gas = gadget_file.gas
             self.gas.softening = gadget_params['SofteningGas']
-            self.gas.temperature = np.copy(gadget_file.gas.internal_energy)
             
             # Convert temperature to Kelvin
             print('Converting internal energy to temperature assuming a gamma=5/3 gas')
@@ -81,9 +80,10 @@ class gadget_converter():
             units['Time_in_s'] = units['Length_in_cm'] / units['Velocity_in_cm_per_s']
             units['Energy_in_cgs'] = units['Mass_in_g'] * units['Length_in_cm'] ** 2 / units['Time_in_s'] ** 2
             
-            self.gas.temperature *= (mean_weight / constants['boltzmann'] * 
-                                     constants['gamma_minus1'] * units['Energy_in_cgs'] / 
-                                     units['Mass_in_g'])
+            self.gas.temperature = gadget_file.gas.internal_energy * \
+                                   (mean_weight / constants['boltzmann'] * 
+                                    constants['gamma_minus1'] * 
+                                    units['Energy_in_cgs'] / units['Mass_in_g'])
 
     def save(self, filename):
         ngas, ndark, nstar = 0, 0, 0

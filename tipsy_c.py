@@ -2,46 +2,74 @@ import numpy as np
 import numpy.ctypeslib as npct
 import ctypes
 
-class File():
-    """Read or write a tipsy file using multiple streams of data."""
-    def __init__(self, filename, mode='wb'):
-        self.lib = load_tipsy()
-        self.lib.tipsy_open_file(ctypes.c_char_p(bytes(filename, 'utf-8')),
-                                 ctypes.c_char_p(bytes(mode, 'utf-8')))
+array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
+array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
 
-    def close(self):
-        self.lib.tipsy_close_file()
+# class Struct(Structure):
+#     _fields_ = [("a", c_int), ("b", c_int)]
+#  
+#     def __init__(self, a, b=2):
+#         super(Struct, self).__init__(a, b)
+#  
+#     def print_values(self):
+#         print self.a, self.b
 
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
-        return False  # always re-raise exceptions
+class tipsy_header(ctypes.Structure):
+    _fields_ = [('time'    , ctypes.c_double),
+                ('nbodies' , ctypes.c_int),
+                ('ndim'    , ctypes.c_int),
+                ('ngas'    , ctypes.c_int),
+                ('ndkark'  , ctypes.c_int),
+                ('nstar'   , ctypes.c_int)
+                ]
 
-    def write_header(self, time, ngas, ndark, nstar):
-        self.lib.tipsy_write_header(time, ngas, ndark, nstar)
-        
-    def write_dark(self, mass, pos, vel, softening, mass_scale, vel_scale):
-        self.lib.tipsy_write_dark_particles(mass, pos, vel, softening, mass_scale, vel_scale, mass.shape[0])
-    
-    def write_star(self, mass, pos, vel, metals, t_form, mass_scale, vel_scale, softening):
-        self.lib.tipsy_write_star_particles(mass, pos, vel, metals, t_form, softening, mass_scale, vel_scale, mass.shape[0])
-    
-    def write_gas(self, mass, pos, vel, density, temperature, hsmooth, metals, mass_scale, vel_scale):
-        self.lib.tipsy_write_gas_particles(mass, pos, vel, density, temperature, hsmooth, metals, mass_scale, vel_scale, mass.shape[0])
-    
-    def write_blackhole(self, mass, pos, vel, softening, mass_scale, vel_scale):
-        self.lib.tipsy_write_blackhole_particles(mass, pos, vel, softening, mass_scale, vel_scale, mass.shape[0])
+class tipsy_gas_data(ctypes.Structure):
+    __fields__ = [('mass'   , array_1d_float),
+                  ('pos'    , array_2d_float),
+                  ('vel'    , array_2d_float),
+                  ('rho'    , array_1d_float),
+                  ('temp'   , array_1d_float),
+                  ('metals' , array_1d_float),
+                  ('hsmooth', array_1d_float),
+                  ('phi'    , array_1d_float),
+                  ('soft'   , ctypes.c_float),
+                  ('size'   , ctypes.c_size_t)
+                  ]
+
+class tipsy_dark_data(ctypes.Structure):
+    __fields__ = [('mass'   , array_1d_float),
+                  ('pos'    , array_2d_float),
+                  ('vel'    , array_2d_float),
+                  ('phi'    , array_1d_float),
+                  ('soft'   , ctypes.c_float),
+                  ('size'   , ctypes.c_size_t)
+                  ]
+
+class tipsy_star_data(ctypes.Structure):
+    __fields__ = [('mass'   , array_1d_float),
+                  ('pos'    , array_2d_float),
+                  ('vel'    , array_2d_float),
+                  ('metals' , array_1d_float),
+                  ('tform'  , array_1d_float),
+                  ('phi'    , array_1d_float),
+                  ('soft'   , ctypes.c_float),
+                  ('size'   , ctypes.c_size_t)
+                  ]
+
+class tipsy_blackhole_data(ctypes.Structure):
+    __fields__ = [('mass'   , array_1d_float),
+                  ('pos'    , array_2d_float),
+                  ('vel'    , array_2d_float),
+                  ('phi'    , array_1d_float),
+                  ('soft'   , ctypes.c_float),
+                  ('size'   , ctypes.c_size_t)
+                  ]
 
 def load_tipsy():
     """Load the tipsy module. For internal use only """
     
     if self.is_loaded is not None:
         return
-    
-    array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
-    array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
     
     def decode_err(err):
         if err < 0:
@@ -89,20 +117,12 @@ def load_tipsy():
                                               array_1d_float, array_1d_float, array_1d_float,
                                               array_1d_float, ctypes.c_float, ctypes.c_float,
                                               ctypes.c_size_t]
-    
-    lib.tipsy_write_blackhole_particles.restype = decode_err
-    lib.tipsy_write_blackhole_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                                    ctypes.c_float, ctypes.c_float, ctypes.c_float,
-                                                    ctypes.c_size_t]
-    
+  
     lib.tipsy_read_header.restype = decode_err
-    lib.tipsy_read_header.argtypes = [ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int),
-                                      ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int) ]
+    lib.tipsy_read_header.argtypes = [ctypes.POINTER(tipsy_header)]
     
     lib.tipsy_read_star_particles.restype = decode_err
-    lib.tipsy_read_star_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                              array_1d_float, array_1d_float, array_1d_float,
-                                              ctypes.c_size_t]
+    lib.tipsy_read_star_particles.argtypes = [ctypes.POINTER()]
     
     lib.tipsy_read_dark_particles.restype = decode_err
     lib.tipsy_read_dark_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
@@ -110,12 +130,8 @@ def load_tipsy():
     
     lib.tipsy_read_gas_particles.restype = decode_err
     lib.tipsy_read_gas_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                             array_1d_float, array_1d_float, array_1d_float, 
+                                             array_1d_float, array_1d_float, array_1d_float,
                                              array_1d_float, array_1d_float, ctypes.c_size_t]
-    
-    lib.tipsy_read_black_holes.restype = decode_err
-    lib.tipsy_read_black_holes.argtype = [array_1d_float, array_2d_float, array_2d_float,
-                                          array_1d_float, ctypes.c_size_t]
     
     self.is_loaded = True
     return lib

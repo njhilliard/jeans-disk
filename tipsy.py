@@ -3,8 +3,81 @@ import astropy.units as apu
 import astropy.constants as apc
 import math
 import numpy as np
-import tipsy_file
+from tipsy_c import *
 
+class File():
+    """Read or write a tipsy file using multiple streams of data."""
+    def __init__(self, filename, mode='wb'):
+        self.lib = load_tipsy()
+        self.lib.tipsy_open_file(ctypes.c_char_p(bytes(filename, 'utf-8')),
+                                 ctypes.c_char_p(bytes(mode, 'utf-8')))
+        self.header = tipsy_header()
+        self.lib.tipsy_read_header(ctypes.byref(self.header))
+
+    def close(self):
+        self.lib.tipsy_close_file()
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+        return False  # always re-raise exceptions
+
+    @property
+    def header(self):
+        return self.header
+
+    @header.setter
+    def header(self, h):
+        self.header = h
+    
+    @property
+    def darkmatter(self):
+        if self.dark is None:
+            ndark = self.header.ndark
+            self.dark = tipsy_dark_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)), float(0.0), ndark)
+            self.lib.tipsy_read_dark_particles(self.dark)
+        return self.dark
+    
+    @darkmatter.setter
+    def darkmatter(self, dp):
+        self.dark = dp
+    
+    @property
+    def stars(self):
+        if self.star is None:
+            nstar = self.header.nstar
+            self.star = tipsy_star_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
+                                        np.empty(ndark), np.empty(ndark), np.empty(ndark),
+                                        float(0.0), ndark)
+            self.lib.tipsy_read_star_particles(self.star)
+        return self.star
+
+    @stars.setter
+    def stars(self, sd):
+        self.star = sd
+    
+    @property
+    def gas(self):
+        if self.gas is None:
+            ngas = self.header.ngas
+            self.gas = tipsy_gas_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
+                                      np.empty(ndark), np.empty(ndark), np.empty(ndark),
+                                      np.empty(ndark), np.empty(ndark), float(0.0), ndark)
+            self.lib.tipsy_read_gas_particles(self.gas)
+        return self.gas
+    
+    @gas.setter
+    def gas(self, gp):
+        self.gas = gp
+
+    def save(self):
+        self.lib.tipsy_write_header(time, ngas, ndark, nstar)
+        self.lib.tipsy_write_dark_particles(mass, pos, vel, softening, mass.shape[0])
+        self.lib.tipsy_write_star_particles(mass, pos, vel, metals, t_form, softening, mass.shape[0])
+        self.lib.tipsy_write_gas_particles(mass, pos, vel, density, temperature, hsmooth, metals, mass.shape[0])
+        
 class gadget_converter():
     # Some useful astronomy constants in cgs units
     constants = {

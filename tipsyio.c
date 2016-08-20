@@ -134,29 +134,6 @@ int tipsy_read_gas_particles(tipsy_gas_data *d) {
 	return 0;
 }
 
-int tipsy_read_blackhole_particles(tipsy_blackhole_data *d) {
-
-	if (!tipsy_fd) { return TIPSY_READ_UNOPENED; }
-
-	tipsy_star_particle p;
-	const size_t	size = d->size;
-	for (size_t i = 0; i < size; ++i) {
-		if (fread(&p, sizeof(tipsy_star_particle), 1, tipsy_fd) != 1) {
-			tipsy_system_error = strerror(errno);
-			return TIPSY_BAD_READ;
-		}
-		d->mass[i]   = p.mass;
-		d->pos[i][0] = p.pos[0];
-		d->pos[i][1] = p.pos[1];
-		d->pos[i][2] = p.pos[2];
-		d->vel[i][0] = p.vel[0];
-		d->vel[i][1] = p.vel[1];
-		d->vel[i][2] = p.vel[2];
-		d->phi[i]    = p.phi;
-	}
-	return 0;
-}
-
 /*************************************************************************************************************/
 
 int tipsy_write_header(tipsy_header const *h) {
@@ -253,7 +230,10 @@ int tipsy_write_gas_particles(tipsy_gas_data const *d) {
 	return 0;
 }
 
-int tipsy_write_blackhole_particles(tipsy_blackhole_data const *d) {
+/**
+ * 	Tipsy treats blackholes as stars
+ */
+int tipsy_write_blackhole_particles(tipsy_star_data const *d) {
 
 	if (!tipsy_fd) { return TIPSY_WRITE_UNOPENED; }
 

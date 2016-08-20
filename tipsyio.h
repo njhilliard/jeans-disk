@@ -22,10 +22,9 @@ int tipsy_read_header(tipsy_header*);
 int tipsy_read_star_particles(tipsy_star_data*);
 int tipsy_read_dark_particles(tipsy_dark_data*);
 int tipsy_read_gas_particles(tipsy_gas_data*);
-int tipsy_read_blackhole_particles(tipsy_blackhole_data*);
 
 int tipsy_write_header(tipsy_header const*);
 int tipsy_write_star_particles(tipsy_star_data const*);
 int tipsy_write_dark_particles(tipsy_dark_data const*);
 int tipsy_write_gas_particles(tipsy_gas_data const*);
-int tipsy_write_blackhole_particles(tipsy_blackhole_data const*);
+int tipsy_write_blackhole_particles(tipsy_star_data const*);

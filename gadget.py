@@ -19,7 +19,6 @@ class gadget_particle:
 
 class gadget_particle_with_metals(gadget_particle):
     def __init__(self, data, mass, header):
-        super(self.__class__, self).__init__(data, mass, header)
         
         if header['Flag_Sfr'] and header['Flag_StellarAge']:
             self.t_form = np.empty(data['StarFormationTime'].shape, data['StarFormationTime'].dtype)
@@ -35,7 +34,6 @@ class gadget_particle_with_metals(gadget_particle):
 
 class gadget_gas_particle(gadget_particle_with_metals):
     def __init__(self, data, mass, header):
-        super(self.__class__, self).__init__(data, mass, header)
 
         self.internal_energy = np.empty(data['InternalEnergy'].shape, data['InternalEnergy'].dtype)
         data['InternalEnergy'].read_direct(self.internal_energy)

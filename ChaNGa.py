@@ -99,46 +99,48 @@ all_parameters = """
 #bStaticTest                                  Static test of performance
 #bVDetails                                    Verbosity
 #bdoDumpLB                                    Should Orb3dLB dump LB database to text file and stop?
+#dDumpFrameStep                               <number of steps between dumped frames> (DEFAULT: -1 (disabled))
+#dDumpFrameTime                               <time interval between dumped frames> (DEFAULT: -1 (disabled))
 #dExtraStore                                  Extra memory for new particles
 #dSoft                                        Gravitational softening
 #dTheta                                       Opening angle
 #dTheta2                                      Opening angle after switchTheta
-#iDirector                                    <number of director files
-#iOctRefineLevel                              Binary logarithm of the number of sub-bins a bin is split into for Oct decomposition (e.g. octRefineLevel "3 splits into 8 sub-bins) (default
+#iDirector                                    <number of director files: 1, 2, 3> (DEFAULT: 1)
+#iOctRefineLevel                              Binary logarithm of the number of sub-bins a bin is split into for Oct decomposition (e.g. octRefineLevel "3 splits into 8 sub-bins) (default: 1)
 #iStartStep                                   Initial step numbering
 #iVerbosity                                   Verbosity
-#iWallRunTime                                 <Maximum Wallclock time (in minutes) to run> (DEFAULT
+#iWallRunTime                                 <Maximum Wallclock time (in minutes) to run> (DEFAULT: 0 = infinite)
 #killAt                                       Stop the simulation after this step
-#nTreePieces                                  Number of TreePieces (default
-#nYield                                       Yield Period (default
+#nTreePieces                                  Number of TreePieces (default: 8*procs)
+#nYield                                       Yield Period (default: 5)
 
-# Cosmological+periodic parameters
+####### Cosmological+periodic parameters #######
 #bComove                                      Comoving coordinates
 #bEwald                                       enable/disable Ewald correction
 #bPeriodic                                    Periodic Boundaries
 #bPhysicalSoft                                Physical gravitational softening length
 #bSoftMaxMul                                  Use maximum comoving gravitational softening length as a multiplier +SMM
-#dEwCut                                       <dEwCut> (DEFAULT
-#dEwhCut                                      <dEwhCut> (DEFAULT
-#dHubble0                                     <dHubble0> (DEFAULT
+#dEwCut                                       <dEwCut> (DEFAULT: 2.6)
+#dEwhCut                                      <dEwhCut> (DEFAULT: 2.8)
+#dHubble0                                     <dHubble0> (DEFAULT: 0.0)
 #dKpcUnit                                     <Kiloparsec/system length unit>
-#dLambda                                      <dLambda> (DEFAULT
-#dOmega0                                      <dOmega0> (DEFAULT
-#dOmegaRad                                    <dOmegaRad> (DEFAULT
-#dOmegab                                      <dOmegab> = (DEFAULT
+#dLambda                                      <dLambda> (DEFAULT: 0.0)
+#dOmega0                                      <dOmega0> (DEFAULT: 1.0)
+#dOmegaRad                                    <dOmegaRad> (DEFAULT: 0.0)
+#dOmegab                                      <dOmegab> = (DEFAULT: 0.0)
 #dPeriod                                      Periodic size
-#dQuintess                                    <dQuintessence (constant w = -1/2) > (DEFAULT
+#dQuintess                                    <dQuintessence (constant w = -1/2) > (DEFAULT: 0.0)
 #dRedTo                                       specifies final redshift for the simulation
 #dSoftMax                                     maximum comoving gravitational softening length (abs or multiplier)
 #daSwitchTheta                                <a to switch theta at> (DEFAULT
-#ddHonHLimit                                  <|dH|/H Limiter> (DEFAULT
-#dhMinOverSoft                                <Minimum h as a fraction of Softening> (DEFAULT
-#dxPeriod                                     <periodic box length in x-dimension> (DEFAULT
-#dyPeriod                                     <periodic box length in y-dimension> (DEFAULT
-#dzPeriod                                     <periodic box length in z-dimension> (DEFAULT
+#ddHonHLimit                                  <|dH|/H Limiter> (DEFAULT: 0.1)
+#dhMinOverSoft                                <Minimum h as a fraction of Softening> (DEFAULT: 0.0)
+#dxPeriod                                     <periodic box length in x-dimension> (DEFAULT: 1.0)
+#dyPeriod                                     <periodic box length in y-dimension> (DEFAULT: 1.0)
+#dzPeriod                                     <periodic box length in z-dimension> (DEFAULT: 1.0)
 #nReplicas                                    Number of periodic replicas
 
-# Basic I/O
+####### Basic I/O #######
 #achInFile                                    input file name (or base file name)
 #achOutName                                   output name for snapshots and logfile
 #bDoIOrderOutput                              enable/disable iOrder outputs
@@ -147,14 +149,12 @@ all_parameters = """
 #bDoublePos                                   input/output double precision positions
 #bDoubleVel                                   input/output double precision velocities
 #bParaWrite                                   enable/disable parallel writing of files
-#dDumpFrameStep                               <number of steps between dumped frames> (DEFAULT
-#dDumpFrameTime                               <time interval between dumped frames> (DEFAULT
-#iBinaryOutput                                <array outputs 0 ascii, 1 float, 2 double, 3 FLOAT(internal)> (DEFAULT
+#iBinaryOutput                                <array outputs 0 ascii, 1 float, 2 double, 3 FLOAT(internal)> (DEFAULT: 0)
 #iCheckInterval                               Checkpoint Interval
 #iLogInterval                                 Log Interval
 #iOutInterval                                 Output Interval
 
-# Time steps
+####### Time steps #######
 #bEpsAccStep                                  Use sqrt(eps/a) timestepping
 #bGravStep                                    Use gravity interaction timestepping
 #dDelta                                       Base Timestep for integration
@@ -163,66 +163,66 @@ all_parameters = """
 #nSteps                                       Number of Timesteps
 #nTruncateRung                                <number of MaxRung particles to delete MaxRung> (DEFAULT
 
-# Performance
+####### Performance #######
 #bDoSimulateLB                                Should Orb3dLB simulate LB decisions from dumped text file and stop?
-#bPrefetch                                    Enable prefetching in the cache (default
-#bRandChunks                                  Randomize the order of remote chunk computation (default
+#bPrefetch                                    Enable prefetching in the cache (default: ON)
+#bRandChunks                                  Randomize the order of remote chunk computation (default: ON)
 #bUseCkLoopPar                                enable CkLoop to parallelize within node
 #dFracLoadBalance                             Minimum active particles for load balancing
-#dFracNoDomainDecomp                          Fraction of active particles for no new DD (DEFAULT
+#dFracNoDomainDecomp                          Fraction of active particles for no new DD (DEFAULT: 0.0)
 #dMaxBalance                                  Maximum piece ratio for load balancing
 #ilbDumpIteration                             Load balancing iteration for which to dump database
-#nBucket                                      Particles per Bucket (default
-#nCacheDepth                                  Cache Line Depth (default
-#nChunks                                      Chunks per TreePiece (default
+#nBucket                                      Particles per Bucket (default: 12)
+#nCacheDepth                                  Cache Line Depth (default: 4)
+#nChunks                                      Chunks per TreePiece (default: 1)
 #nDomainDecompose                             Kind of domain decomposition of particles
-#nIOProcessor                                 number of simultaneous I/O processors (DEFAULT
+#nIOProcessor                                 number of simultaneous I/O processors (DEFAULT: 0 (all))
 #nPartPerChare                                Average number of particles per TreePiece
 
-# Gas parameters
+####### Gas parameters #######
 #bConcurrentSph                               Enable SPH running concurrently with Gravity
 #bDoCSound                                    enable/disable sound speed outputs
 #bDoDensity                                   Enable Density outputs
 #bDoGas                                       Enable Gas Calculation
 #bDynGrowMass                                 <dynamic growmass particles>
 #bFastGas                                     Fast Gas Method
-#bFeedBack                                    <Stars provide feedback> (DEFAULT
+#bFeedBack                                    <Stars provide feedback> (DEFAULT: 0)
 #bGasAdiabatic                                <Gas is Adiabatic>
 #bGasCooling                                  <Gas is Cooling>
 #bGasIsothermal                               <Gas is Isothermal>
 #bSphStep                                     <SPH timestepping>
-#bStarForm                                    <Star Forming> (DEFAULT
-#bViscosityLimitdt                            <Balsara Viscosity Limit dt> (DEFAULT
-#bViscosityLimiter                            <Viscosity Limiter> (DEFAULT
-#dConstAlpha                                  <Alpha constant in viscosity> (DEFAULT
-#dConstBeta                                   <Beta constant in viscosity> (DEFAULT
-#dConstGamma                                  <Ratio of specific heats> (DEFAULT
-#dEtaCourant                                  <Courant criterion> (DEFAULT
-#dEtauDot                                     <uDot criterion> (DEFAULT
+#bStarForm                                    <Star Forming> (DEFAULT: 0)
+#bViscosityLimitdt                            <Balsara Viscosity Limit dt> (DEFAULT: 0)
+#bViscosityLimiter                            <Viscosity Limiter> (DEFAULT: 0)
+#dConstAlpha                                  <Alpha constant in viscosity> (DEFAULT: 1.0)
+#dConstBeta                                   <Beta constant in viscosity> (DEFAULT: 2.0)
+#dConstGamma                                  <Ratio of specific heats> (DEFAULT: 5/3)
+#dEtaCourant                                  <Courant criterion> (DEFAULT: 0.4)
+#dEtauDot                                     <uDot criterion> (DEFAULT: 0.25)
 #dFracFastGas                                 <Fraction of Active Particles for Fast Gas>
 #dGasConst                                    <Gas Constant>
-#dGrowDeltaM                                  <Total growth in mass/particle> (DEFAULT
-#dGrowEndT                                    <End time for growing mass> (DEFAULT
-#dGrowStartT                                  <Start time for growing mass> (DEFAULT
+#dGrowDeltaM                                  <Total growth in mass/particle> (DEFAULT: 0.0)
+#dGrowEndT                                    <End time for growing mass> (DEFAULT: 1.0)
+#dGrowStartT                                  <Start time for growing mass> (DEFAULT: 0.0)
 #dMeanMolWeight                               <Mean molecular weight in amu> (DEFAULT
 #dMsolUnit                                    <Solar mass/system mass unit>
-#dResolveJeans                                <Fraction of pressure to resolve minimum Jeans mass> (DEFAULT
-#iRandomSeed                                  <Feedback random Seed> (DEFAULT
-#iViscosityLimiter                            <Viscosity Limiter Type> (DEFAULT
-#nGrowMass                                    <number of particles to increase mass> (DEFAULT
+#dResolveJeans                                <Fraction of pressure to resolve minimum Jeans mass> (DEFAULT: 0.0)
+#iRandomSeed                                  <Feedback random Seed> (DEFAULT: 1)
+#iViscosityLimiter                            <Viscosity Limiter Type> (DEFAULT: 1)
+#nGrowMass                                    <number of particles to increase mass> (DEFAULT: 0)
 #nSmooth                                      Number of neighbors for smooth
 
-# requires PUSH_FORCE
-#dFracPush                                    Maximum proportion of active to total particles for push-based force evaluation (DEFAULT
+####### requires PUSH_FORCE #######
+#dFracPush                                    Maximum proportion of active to total particles for push-based force evaluation (DEFAULT: 0.0)
 
-# requires SELECTIVE_TRACING
+####### requires SELECTIVE_TRACING #######
 #iTraceRung                                   Gravity starting rung to trace selectively
 #iTraceStart                                  When to start selective tracing
 #iTraceFor                                    Trace this many instances of the selected rungs
 #iTraceSkip                                   Skip tracing for these many iterations
 #iTraceMax                                    Max. num. iterations traced
 
-# requires CUDA
+####### requires CUDA #######
 #localNodesPerReq                             Num. local node interactions allowed per CUDA request
 #remoteNodesPerReq                            Num. remote node interactions allowed per CUDA request
 #remoteResumeNodesPerReq                      Num. remote resume node interactions allowed per CUDA request

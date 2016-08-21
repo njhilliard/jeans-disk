@@ -11,8 +11,8 @@ class File():
         self.lib = load_tipsy()
         self.lib.tipsy_open_file(ctypes.c_char_p(bytes(filename, 'utf-8')),
                                  ctypes.c_char_p(bytes(mode, 'utf-8')))
-        self.header = tipsy_header()
-        self.lib.tipsy_read_header(ctypes.byref(self.header))
+        self.hdr = tipsy_header()
+        self.lib.tipsy_read_header(ctypes.byref(self.hdr))
 
     def close(self):
         self.lib.tipsy_close_file()
@@ -26,51 +26,51 @@ class File():
 
     @property
     def header(self):
-        return self.header
+        return self.hdr
 
     @header.setter
     def header(self, h):
-        self.header = h
+        self.hdr = h
     
     @property
     def darkmatter(self):
-        if self.dark is None:
-            ndark = self.header.ndark
-            self.dark = tipsy_dark_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)), float(0.0), ndark)
-            self.lib.tipsy_read_dark_particles(self.dark)
-        return self.dark
+        if self.dark_particles is None:
+            ndark = self.hdr.ndark
+            self.dark_particles = tipsy_dark_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)), float(0.0), ndark)
+            self.lib.tipsy_read_dark_particles(self.dark_particles)
+        return self.dark_particles
     
     @darkmatter.setter
     def darkmatter(self, dp):
-        self.dark = dp
+        self.dark_particles = dp
     
     @property
     def stars(self):
-        if self.star is None:
-            nstar = self.header.nstar
-            self.star = tipsy_star_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
+        if self.star_particles is None:
+            nstar = self.hdr.nstar
+            self.star_particles = tipsy_star_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
                                         np.empty(ndark), np.empty(ndark), np.empty(ndark),
                                         float(0.0), ndark)
-            self.lib.tipsy_read_star_particles(self.star)
-        return self.star
+            self.lib.tipsy_read_star_particles(self.star_particles)
+        return self.star_particles
 
     @stars.setter
     def stars(self, sd):
-        self.star = sd
+        self.star_particles = sd
     
     @property
     def gas(self):
-        if self.gas is None:
-            ngas = self.header.ngas
-            self.gas = tipsy_gas_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
+        if self.gas_particles is None:
+            ngas = self.hdr.ngas
+            self.gas_particles = tipsy_gas_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
                                       np.empty(ndark), np.empty(ndark), np.empty(ndark),
                                       np.empty(ndark), np.empty(ndark), float(0.0), ndark)
-            self.lib.tipsy_read_gas_particles(self.gas)
-        return self.gas
+            self.lib.tipsy_read_gas_particles(self.gas_particles)
+        return self.gas_particles
     
     @gas.setter
     def gas(self, gp):
-        self.gas = gp
+        self.gas_particles = gp
 
     def save(self):
         self.lib.tipsy_write_header(time, ngas, ndark, nstar)

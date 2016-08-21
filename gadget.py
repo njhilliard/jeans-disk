@@ -22,14 +22,10 @@ class gadget_particle_with_metals(gadget_particle):
         if header['Flag_Sfr'] and header['Flag_StellarAge']:
             self.t_form = np.empty(data['StellarFormationTime'].shape, data['StellarFormationTime'].dtype)
             data['StellarFormationTime'].read_direct(self.t_form)
-        else:
-            self.t_form = np.zeros(self.size, dtype=np.float32)
         
         if header['Flag_Sfr'] and header['Flag_Metals']:
             self.metals = np.empty(data['Metallicity'].shape, data['Metallicity'].dtype)
             data['Metallicity'].read_direct(self.metals)
-        else:
-            self.metals = np.zeros(self.size, dtype=np.float32)
 
 class gadget_gas_particle(gadget_particle_with_metals):
     def __init__(self, data, mass, header):
@@ -45,8 +41,6 @@ class gadget_gas_particle(gadget_particle_with_metals):
         if header['Flag_Cooling']:
             self.electron_density = np.empty(data['ElectronAbundance'].shape, data['ElectronAbundance'].dtype)
             data['ElectronAbundance'].read_direct(self.electron_density)
-        else:
-            self.electron_density = np.ones(self.size, dtype=np.float32)
         
         if header['Flag_Sfr']:
             self.sfr = np.empty(data['StarFormationRate'].shape, data['StarFormationRate'].dtype)

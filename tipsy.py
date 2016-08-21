@@ -7,7 +7,7 @@ from tipsy_c import *
 
 class File():
     """Read or write a tipsy file using multiple streams of data."""
-    def __init__(self, filename, mode='wb'):
+    def __init__(self, filename, mode='rb'):
         self.lib = load_tipsy()
         self.lib.tipsy_open_file(ctypes.c_char_p(bytes(filename, 'utf-8')),
                                  ctypes.c_char_p(bytes(mode, 'utf-8')))

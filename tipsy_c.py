@@ -59,7 +59,7 @@ class tipsy_blackhole_data(ctypes.Structure):
 def load_tipsy():
     """Load the tipsy module. For internal use only """
     
-    if self.is_loaded is not None:
+    if load_tipsy.is_loaded:
         return
     
     def decode_err(err):
@@ -90,39 +90,29 @@ def load_tipsy():
     lib.tipsy_close_file.argtypes = []
     
     lib.tipsy_write_header.restype = decode_err
-    lib.tipsy_write_header.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_int,
-                                       ctypes.c_int]
+    lib.tipsy_write_header.argtypes = [ctypes.POINTER(tipsy_header)]
     
     lib.tipsy_write_star_particles.restype = decode_err
-    lib.tipsy_write_star_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                               array_1d_float, array_1d_float, ctypes.c_float,
-                                               ctypes.c_float, ctypes.c_float, ctypes.c_size_t]
+    lib.tipsy_write_star_particles.argtypes = [ctypes.POINTER(tipsy_star_data)]
     
     lib.tipsy_write_dark_particles.restype = decode_err
-    lib.tipsy_write_dark_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                               ctypes.c_float, ctypes.c_float, ctypes.c_float,
-                                               ctypes.c_size_t]
+    lib.tipsy_write_dark_particles.argtypes = [ctypes.POINTER(tipsy_dark_data)]
     
     lib.tipsy_write_gas_particles.restype = decode_err
-    lib.tipsy_write_gas_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                              array_1d_float, array_1d_float, array_1d_float,
-                                              array_1d_float, ctypes.c_float, ctypes.c_float,
-                                              ctypes.c_size_t]
+    lib.tipsy_write_gas_particles.argtypes = [ctypes.POINTER(tipsy_gas_data)]
   
     lib.tipsy_read_header.restype = decode_err
     lib.tipsy_read_header.argtypes = [ctypes.POINTER(tipsy_header)]
     
     lib.tipsy_read_star_particles.restype = decode_err
-    lib.tipsy_read_star_particles.argtypes = [ctypes.POINTER()]
+    lib.tipsy_read_star_particles.argtypes = [ctypes.POINTER(tipsy_star_data)]
     
     lib.tipsy_read_dark_particles.restype = decode_err
-    lib.tipsy_read_dark_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                              array_1d_float, ctypes.c_size_t]
+    lib.tipsy_read_dark_particles.argtypes = [ctypes.POINTER(tipsy_dark_data)]
     
     lib.tipsy_read_gas_particles.restype = decode_err
-    lib.tipsy_read_gas_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                             array_1d_float, array_1d_float, array_1d_float,
-                                             array_1d_float, array_1d_float, ctypes.c_size_t]
+    lib.tipsy_read_gas_particles.argtypes = [ctypes.POINTER(tipsy_gas_data)]
     
-    self.is_loaded = True
+    load_tipsy.is_loaded = True
     return lib
+load_tipsy.is_loaded = False

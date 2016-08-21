@@ -5,65 +5,56 @@ import ctypes
 array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
 array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
 
-# class Struct(Structure):
-#     _fields_ = [("a", c_int), ("b", c_int)]
-#  
-#     def __init__(self, a, b=2):
-#         super(Struct, self).__init__(a, b)
-#  
-#     def print_values(self):
-#         print self.a, self.b
-
 class tipsy_header(ctypes.Structure):
     _fields_ = [('time'    , ctypes.c_double),
                 ('nbodies' , ctypes.c_int),
                 ('ndim'    , ctypes.c_int),
                 ('ngas'    , ctypes.c_int),
-                ('ndkark'  , ctypes.c_int),
+                ('ndark'   , ctypes.c_int),
                 ('nstar'   , ctypes.c_int)
                 ]
 
 class tipsy_gas_data(ctypes.Structure):
-    __fields__ = [('mass'   , array_1d_float),
-                  ('pos'    , array_2d_float),
-                  ('vel'    , array_2d_float),
-                  ('rho'    , array_1d_float),
-                  ('temp'   , array_1d_float),
-                  ('metals' , array_1d_float),
-                  ('hsmooth', array_1d_float),
-                  ('phi'    , array_1d_float),
-                  ('soft'   , ctypes.c_float),
-                  ('size'   , ctypes.c_size_t)
-                  ]
+    _fields_ = [('mass'   , array_1d_float),
+               ('pos'    , array_2d_float),
+               ('vel'    , array_2d_float),
+               ('rho'    , array_1d_float),
+               ('temp'   , array_1d_float),
+               ('metals' , array_1d_float),
+               ('hsmooth', array_1d_float),
+               ('phi'    , array_1d_float),
+               ('soft'   , ctypes.c_float),
+               ('size'   , ctypes.c_size_t)
+              ]
 
 class tipsy_dark_data(ctypes.Structure):
-    __fields__ = [('mass'   , array_1d_float),
-                  ('pos'    , array_2d_float),
-                  ('vel'    , array_2d_float),
-                  ('phi'    , array_1d_float),
-                  ('soft'   , ctypes.c_float),
-                  ('size'   , ctypes.c_size_t)
-                  ]
+    _fields_ = [('mass'   , array_1d_float),
+                ('pos'    , array_2d_float),
+                ('vel'    , array_2d_float),
+                ('phi'    , array_1d_float),
+                ('soft'   , ctypes.c_float),
+                ('size'   , ctypes.c_size_t)
+                ]
 
 class tipsy_star_data(ctypes.Structure):
-    __fields__ = [('mass'   , array_1d_float),
-                  ('pos'    , array_2d_float),
-                  ('vel'    , array_2d_float),
-                  ('metals' , array_1d_float),
-                  ('tform'  , array_1d_float),
-                  ('phi'    , array_1d_float),
-                  ('soft'   , ctypes.c_float),
-                  ('size'   , ctypes.c_size_t)
-                  ]
+    _fields_ = [('mass'   , array_1d_float),
+                ('pos'    , array_2d_float),
+                ('vel'    , array_2d_float),
+                ('metals' , array_1d_float),
+                ('tform'  , array_1d_float),
+                ('phi'    , array_1d_float),
+                ('soft'   , ctypes.c_float),
+                ('size'   , ctypes.c_size_t)
+                ]
 
 class tipsy_blackhole_data(ctypes.Structure):
-    __fields__ = [('mass'   , array_1d_float),
-                  ('pos'    , array_2d_float),
-                  ('vel'    , array_2d_float),
-                  ('phi'    , array_1d_float),
-                  ('soft'   , ctypes.c_float),
-                  ('size'   , ctypes.c_size_t)
-                  ]
+    _fields_ = [('mass'   , array_1d_float),
+                ('pos'    , array_2d_float),
+                ('vel'    , array_2d_float),
+                ('phi'    , array_1d_float),
+                ('soft'   , ctypes.c_float),
+                ('size'   , ctypes.c_size_t)
+               ]
 
 def load_tipsy():
     """Load the tipsy module. For internal use only """

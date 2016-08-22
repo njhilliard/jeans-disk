@@ -5,6 +5,13 @@ import ctypes
 array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
 array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
 
+def print_struct(s):
+    repr = []
+    for f in s._fields_:
+        a = getattr(s, f[0])
+        repr.append('{0:10s}: {1:s}'.format(f[0], str(a.shape) if isinstance(a, np.ndarray) else str(a)))
+    return '\n'.join(repr)
+
 class tipsy_header(ctypes.Structure):
     _fields_ = [('time'    , ctypes.c_double),
                 ('nbodies' , ctypes.c_int),
@@ -13,9 +20,12 @@ class tipsy_header(ctypes.Structure):
                 ('ndark'   , ctypes.c_int),
                 ('nstar'   , ctypes.c_int)
                 ]
+    
+    def __str__(self):
+        return print_struct(self)
 
 class tipsy_gas_data(ctypes.Structure):
-    _fields_ = [('mass'   , array_1d_float),
+    _fields_ = [('mass'  , array_1d_float),
                ('pos'    , array_2d_float),
                ('vel'    , array_2d_float),
                ('rho'    , array_1d_float),
@@ -26,6 +36,9 @@ class tipsy_gas_data(ctypes.Structure):
                ('soft'   , ctypes.c_float),
                ('size'   , ctypes.c_size_t)
               ]
+    
+    def __str__(self):
+        return print_struct(self)
 
 class tipsy_dark_data(ctypes.Structure):
     _fields_ = [('mass'   , array_1d_float),
@@ -35,6 +48,9 @@ class tipsy_dark_data(ctypes.Structure):
                 ('soft'   , ctypes.c_float),
                 ('size'   , ctypes.c_size_t)
                 ]
+    
+    def __str__(self):
+        return print_struct(self)
 
 class tipsy_star_data(ctypes.Structure):
     _fields_ = [('mass'   , array_1d_float),
@@ -46,6 +62,9 @@ class tipsy_star_data(ctypes.Structure):
                 ('soft'   , ctypes.c_float),
                 ('size'   , ctypes.c_size_t)
                 ]
+    
+    def __str__(self):
+        return print_struct(self)
 
 class tipsy_blackhole_data(ctypes.Structure):
     _fields_ = [('mass'   , array_1d_float),
@@ -55,6 +74,9 @@ class tipsy_blackhole_data(ctypes.Structure):
                 ('soft'   , ctypes.c_float),
                 ('size'   , ctypes.c_size_t)
                ]
+    
+    def __str__(self):
+        return print_struct(self)
 
 def load_tipsy():
     """Load the tipsy module. For internal use only """

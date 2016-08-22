@@ -4,7 +4,13 @@
 #include <string.h>
 
 static const char *tipsy_system_error = NULL;
-static FILE *      tipsy_fd	   = NULL;
+static FILE *tipsy_fd = NULL;
+static tipsy_header hdr;
+
+static void tipsy_reset_fd(long offset) {
+	rewind(tipsy_fd);
+	do {int i = fseek(tipsy_fd, offset, SEEK_SET); } while(0);
+}
 
 const char *tipsy_get_last_system_error() { return tipsy_system_error; }
 
@@ -51,20 +57,32 @@ FILE *tipsy_get_fd() { return tipsy_fd; }
 int tipsy_read_header(tipsy_header *h) {
 	if (!tipsy_fd) { return TIPSY_READ_UNOPENED; }
 
+	tipsy_reset_fd(0);
 	if (fread(h, sizeof(tipsy_header), 1, tipsy_fd) != 1) {
 		tipsy_system_error = strerror(errno);
 		return TIPSY_BAD_READ;
 	}
 
+	memcpy(&hdr, h, sizeof(tipsy_header));
+
 	return 0;
 }
+
+/**
+ * 	  NOTE: These functions all assume that tipsy_read_header has already
+ * 	  		been called. Failure to do so results in undefined behavior.
+  */
 
 int tipsy_read_star_particles(tipsy_star_data *d) {
 
 	if (!tipsy_fd) { return TIPSY_READ_UNOPENED; }
 
 	tipsy_star_particle p;
-	const size_t	size = d->size;
+	const size_t size = d->size;
+	const long offset = sizeof(tipsy_header) +
+						hdr.ngas * sizeof(tipsy_gas_particle) +
+					    hdr.ndark * sizeof(tipsy_dark_particle);
+	tipsy_reset_fd(offset);
 	for (size_t i = 0; i < size; ++i) {
 		if (fread(&p, sizeof(tipsy_star_particle), 1, tipsy_fd) != 1) {
 			tipsy_system_error = strerror(errno);
@@ -90,7 +108,8 @@ int tipsy_read_dark_particles(tipsy_dark_data *d) {
 	if (!tipsy_fd) { return TIPSY_READ_UNOPENED; }
 
 	tipsy_dark_particle p;
-	const size_t	size = d->size;
+	const size_t size = d->size;
+	tipsy_reset_fd(sizeof(tipsy_header) + hdr.ngas * sizeof(tipsy_gas_particle));
 	for (size_t i = 0; i < size; ++i) {
 		if (fread(&p, sizeof(tipsy_dark_particle), 1, tipsy_fd) != 1) {
 			tipsy_system_error = strerror(errno);
@@ -114,7 +133,8 @@ int tipsy_read_gas_particles(tipsy_gas_data *d) {
 	if (!tipsy_fd) { return TIPSY_READ_UNOPENED; }
 
 	tipsy_gas_particle p;
-	const size_t       size = d->size;
+	const size_t size = d->size;
+	tipsy_reset_fd(sizeof(tipsy_header));
 	for (size_t i = 0; i < size; ++i) {
 		if (fread(&p, sizeof(tipsy_gas_particle), 1, tipsy_fd) != 1) {
 			tipsy_system_error = strerror(errno);

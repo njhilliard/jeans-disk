@@ -20,8 +20,11 @@ class gadget_particle:
 class gadget_particle_with_metals(gadget_particle):
     def __init__(self, data, mass, header):
         if header['Flag_Sfr'] and header['Flag_StellarAge']:
-            self.t_form = np.empty(data['StellarFormationTime'].shape, data['StellarFormationTime'].dtype)
-            data['StellarFormationTime'].read_direct(self.t_form)
+            if data['StellarFormationTime'] is None:
+                print('Stellar evolution enabled, but StellarFormationTime is not present. Skipping...')
+            else:
+                self.t_form = np.empty(data['StellarFormationTime'].shape, data['StellarFormationTime'].dtype)
+                data['StellarFormationTime'].read_direct(self.t_form)
         
         if header['Flag_Sfr'] and header['Flag_Metals']:
             self.metals = np.empty(data['Metallicity'].shape, data['Metallicity'].dtype)

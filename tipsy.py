@@ -13,6 +13,10 @@ class File():
                                  ctypes.c_char_p(bytes(mode, 'utf-8')))
         self.hdr = tipsy_header()
         self.lib.tipsy_read_header(ctypes.byref(self.hdr))
+        
+        self.dark_particles = None
+        self.star_particles = None
+        self.gas_particles = None
 
     def close(self):
         self.lib.tipsy_close_file()
@@ -48,9 +52,9 @@ class File():
     def stars(self):
         if self.star_particles is None:
             nstar = self.hdr.nstar
-            self.star_particles = tipsy_star_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
-                                        np.empty(ndark), np.empty(ndark), np.empty(ndark),
-                                        float(0.0), ndark)
+            self.star_particles = tipsy_star_data(np.empty(nstar), np.empty((nstar, 3)), np.empty((nstar, 3)),
+                                        np.empty(nstar), np.empty(nstar), np.empty(nstar),
+                                        float(0.0), nstar)
             self.lib.tipsy_read_star_particles(self.star_particles)
         return self.star_particles
 
@@ -62,9 +66,9 @@ class File():
     def gas(self):
         if self.gas_particles is None:
             ngas = self.hdr.ngas
-            self.gas_particles = tipsy_gas_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)),
-                                      np.empty(ndark), np.empty(ndark), np.empty(ndark),
-                                      np.empty(ndark), np.empty(ndark), float(0.0), ndark)
+            self.gas_particles = tipsy_gas_data(np.empty(ngas), np.empty((ngas, 3)), np.empty((ngas, 3)),
+                                      np.empty(ngas), np.empty(ngas), np.empty(ngas),
+                                      np.empty(ngas), np.empty(ngas), float(0.0), ngas)
             self.lib.tipsy_read_gas_particles(self.gas_particles)
         return self.gas_particles
     

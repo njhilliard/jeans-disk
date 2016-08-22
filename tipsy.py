@@ -184,7 +184,17 @@ class gadget_converter():
                     ndark += self.bulge.size
                     file.write_dark(self.bulge.mass, self.bulge.positions,
                                     self.bulge.velocities, self.bulge.softening)
-            else:
+            
+            # Convert boundary particles to dark matter particles
+            if self.boundary is not None and not self.convert_bh:
+                ndark += self.boundary.size
+                eps = self.halo.softening
+                if not self.preserve_bndry_softening:
+                    eps = self.boundary.softening
+                file.write_dark(self.boundary.mass, self.boundary.positions,
+                                self.boundary.velocities, eps)
+                
+            if not self.is_cosmological:
                 if self.disk is not None:
                     nstar += self.disk.size
                     file.write_star(self.disk.mass, self.disk.positions,
@@ -195,15 +205,7 @@ class gadget_converter():
                     nstar += self.bulge.size
                     file.write_star(self.bulge.mass, self.bulge.positions,
                                     self.bulge.velocities, self.bulge.softening)
-    
-            # Convert boundary particles to dark matter particles
-            if self.boundary is not None and not self.convert_bh:
-                ndark += self.boundary.size
-                eps = self.halo.softening
-                if not self.preserve_bndry_softening:
-                    eps = self.boundary.softening
-                file.write_dark(self.boundary.mass, self.boundary.positions,
-                                self.boundary.velocities, eps)
+
 
             if self.star is not None:
                 nstar += self.star.size

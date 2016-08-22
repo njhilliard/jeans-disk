@@ -27,7 +27,7 @@ class File():
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
         return False  # always re-raise exceptions
-
+    
     @property
     def header(self):
         return self.hdr
@@ -39,9 +39,8 @@ class File():
     @property
     def darkmatter(self):
         if self.dark_particles is None:
-            ndark = self.hdr.ndark
-            self.dark_particles = tipsy_dark_data(np.empty(ndark), np.empty((ndark, 3)), np.empty((ndark, 3)), float(0.0), ndark)
-            self.lib.tipsy_read_dark_particles(self.dark_particles)
+            self.dark_particles = tipsy_dark_data(self.hdr.ndark)
+            self.lib.tipsy_read_dark_particles(ctypes.byref(self.dark_particles))
         return self.dark_particles
     
     @darkmatter.setter
@@ -51,11 +50,8 @@ class File():
     @property
     def stars(self):
         if self.star_particles is None:
-            nstar = self.hdr.nstar
-            self.star_particles = tipsy_star_data(np.empty(nstar), np.empty((nstar, 3)), np.empty((nstar, 3)),
-                                        np.empty(nstar), np.empty(nstar), np.empty(nstar),
-                                        float(0.0), nstar)
-            self.lib.tipsy_read_star_particles(self.star_particles)
+            self.star_particles = tipsy_star_data(self.hdr.nstar)
+            self.lib.tipsy_read_star_particles(ctypes.byref(self.star_particles))
         return self.star_particles
 
     @stars.setter
@@ -65,11 +61,8 @@ class File():
     @property
     def gas(self):
         if self.gas_particles is None:
-            ngas = self.hdr.ngas
-            self.gas_particles = tipsy_gas_data(np.empty(ngas), np.empty((ngas, 3)), np.empty((ngas, 3)),
-                                      np.empty(ngas), np.empty(ngas), np.empty(ngas),
-                                      np.empty(ngas), np.empty(ngas), float(0.0), ngas)
-            self.lib.tipsy_read_gas_particles(self.gas_particles)
+            self.gas_particles = tipsy_gas_data(self.hdr.ngas)
+            self.lib.tipsy_read_gas_particles(ctypes.byref(self.gas_particles))
         return self.gas_particles
     
     @gas.setter

@@ -2,81 +2,129 @@ import numpy as np
 import numpy.ctypeslib as npct
 import ctypes
 
-array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
-array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
+float_p = ctypes.POINTER(ctypes.c_float)
 
-def print_struct(s):
-    repr = []
-    for f in s._fields_:
-        a = getattr(s, f[0])
-        repr.append('{0:10s}: {1:s}'.format(f[0], str(a.shape) if isinstance(a, np.ndarray) else str(a)))
-    return '\n'.join(repr)
+def tipsy_make_array(size, ndims=1, type=np.float32):
+    if ndims == 1:
+        return np.empty(size, dtype=type)
+    if ndims == 2:
+        return np.empty((size, 3), dtype=type)
+    raise ValueError("tipsy only supports 1d and 2d arrays")
 
-class tipsy_header(ctypes.Structure):
-    _fields_ = [('time'    , ctypes.c_double),
-                ('nbodies' , ctypes.c_int),
-                ('ndim'    , ctypes.c_int),
-                ('ngas'    , ctypes.c_int),
-                ('ndark'   , ctypes.c_int),
-                ('nstar'   , ctypes.c_int)
-                ]
-    
+class tipsy_struct(ctypes.Structure):
+    def __init__(self):
+        self.is_simple = False
+
     def __str__(self):
-        return print_struct(self)
+        repr = []
+        attrs = [k[0] for k in self._fields_] if self.is_simple else sorted(self.__dict__.keys())
+        for k in attrs:
+            if k == 'is_simple':
+                continue
+            a = getattr(self, k)
+            repr.append('{0:10s}: {1:s}'.format(k, str(a.shape) if isinstance(a, np.ndarray) else str(a)))
+        return '\n'.join(repr)
 
-class tipsy_gas_data(ctypes.Structure):
-    _fields_ = [('mass'  , array_1d_float),
-               ('pos'    , array_2d_float),
-               ('vel'    , array_2d_float),
-               ('rho'    , array_1d_float),
-               ('temp'   , array_1d_float),
-               ('metals' , array_1d_float),
-               ('hsmooth', array_1d_float),
-               ('phi'    , array_1d_float),
-               ('soft'   , ctypes.c_float),
-               ('size'   , ctypes.c_size_t)
-              ]
-    
-    def __str__(self):
-        return print_struct(self)
+def tipsy_init_basic_particle(p, size):
+    """For internal use only"""
+    p.mass   = tipsy_make_array(size)
+    p.mass_p = p.mass.ctypes.data_as(float_p)
+    p.pos    = tipsy_make_array(size, ndims=2)
+    p.pos_p  = p.pos.ctypes.data_as(float_p)
+    p.vel    = tipsy_make_array(size, ndims=2)
+    p.vel_p  = p.vel.ctypes.data_as(float_p)
+    p.phi    = tipsy_make_array(size)
+    p.phi_p  = p.phi.ctypes.data_as(float_p)
+    p.soft   = 0.0
+    p.size   = size
 
-class tipsy_dark_data(ctypes.Structure):
-    _fields_ = [('mass'   , array_1d_float),
-                ('pos'    , array_2d_float),
-                ('vel'    , array_2d_float),
-                ('phi'    , array_1d_float),
-                ('soft'   , ctypes.c_float),
-                ('size'   , ctypes.c_size_t)
-                ]
+class tipsy_header(tipsy_struct):
+    _fields_ = [
+        ('time'   , ctypes.c_double),
+        ('nbodies', ctypes.c_int),
+        ('ndim'   , ctypes.c_int),
+        ('ngas'   , ctypes.c_int),
+        ('ndark'  , ctypes.c_int),
+        ('nstar'  , ctypes.c_int)
+    ]
     
-    def __str__(self):
-        return print_struct(self)
+    def __init__(self):
+        self.is_simple = True
 
-class tipsy_star_data(ctypes.Structure):
-    _fields_ = [('mass'   , array_1d_float),
-                ('pos'    , array_2d_float),
-                ('vel'    , array_2d_float),
-                ('metals' , array_1d_float),
-                ('tform'  , array_1d_float),
-                ('phi'    , array_1d_float),
-                ('soft'   , ctypes.c_float),
-                ('size'   , ctypes.c_size_t)
-                ]
+class tipsy_gas_data(tipsy_struct):
+    _fields_ = [
+        ('mass_p'   , float_p),
+        ('pos_p'    , float_p),
+        ('vel_p'    , float_p),
+        ('rho_p'    , float_p),
+        ('temp_p'   , float_p),
+        ('metals_p' , float_p),
+        ('hsmooth_p', float_p),
+        ('phi_p'    , float_p),
+        ('soft'     , ctypes.c_float),
+        ('size'     , ctypes.c_size_t)
+    ]
     
-    def __str__(self):
-        return print_struct(self)
+    def __init__(self, size):
+        super().__init__()
+        tipsy_init_basic_particles(self, size)
+        
+        self.rho        = tipsy_make_array(size)
+        self.rho_p      = self.rho.ctypes.data_as(float_p)
+        self.temp       = tipsy_make_array(size)
+        self.temp_p     = self.temp.ctypes.data_as(float_p)
+        self.metals     = tipsy_make_array(size)
+        self.metals_p   = self.metals.ctypes.data_as(float_p)
+        self.hsmooth    = tipsy_make_array(size)
+        self.hsmooth_p  = self.hsmooth.ctypes.data_as(float_p)
 
-class tipsy_blackhole_data(ctypes.Structure):
-    _fields_ = [('mass'   , array_1d_float),
-                ('pos'    , array_2d_float),
-                ('vel'    , array_2d_float),
-                ('phi'    , array_1d_float),
-                ('soft'   , ctypes.c_float),
-                ('size'   , ctypes.c_size_t)
-               ]
+class tipsy_dark_data(tipsy_struct):
+    _fields_ = [
+        ('mass_p', float_p),
+        ('pos_p' , float_p),
+        ('vel_p' , float_p),
+        ('phi_p' , float_p),
+        ('soft'  , ctypes.c_float),
+        ('size'  , ctypes.c_size_t)
+    ]
+
+    def __init__(self, size):
+        super().__init__()
+        tipsy_init_basic_particle(self, size)
+
+class tipsy_star_data(tipsy_struct):
+    _fields_ = [
+        ('mass_p'  , float_p),
+        ('pos_p'   , float_p),
+        ('vel_p'   , float_p),
+        ('metals_p', float_p),
+        ('tform_p' , float_p),
+        ('phi_p'   , float_p),
+        ('soft'    , ctypes.c_float),
+        ('size'    , ctypes.c_size_t)
+    ]
     
-    def __str__(self):
-        return print_struct(self)
+    def __init__(self, size):
+        super().__init__()
+        tipsy_init_basic_particle(self, size)
+        self.metals     = tipsy_make_array(size)
+        self.metals_p   = self.metals.ctypes.data_as(float_p)
+        self.tform      = tipsy_make_array(size)
+        self.tform_p    = self.tform.ctypes.data_as(float_p)
+
+class tipsy_blackhole_data(tipsy_struct):
+    _fields_ = [
+        ('mass_p', float_p),
+        ('pos_p' , float_p),
+        ('vel_p' , float_p),
+        ('phi_p' , float_p),
+        ('soft'  , ctypes.c_float),
+        ('size'  , ctypes.c_size_t)
+    ]
+    
+    def __init__(self, size):
+        super().__init__()
+        tipsy_init_basic_particle(self, size)
 
 def load_tipsy():
     """Load the tipsy module. For internal use only """

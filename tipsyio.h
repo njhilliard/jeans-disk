@@ -23,8 +23,34 @@ int tipsy_read_star_particles(tipsy_star_data*);
 int tipsy_read_dark_particles(tipsy_dark_data*);
 int tipsy_read_gas_particles(tipsy_gas_data*);
 
-int tipsy_write_header(tipsy_header const*);
-int tipsy_write_star_particles(tipsy_star_data const*);
-int tipsy_write_dark_particles(tipsy_dark_data const*);
-int tipsy_write_gas_particles(tipsy_gas_data const*);
-int tipsy_write_blackhole_particles(tipsy_star_data const*);
+int tipsy_write_header(double time, int ngas, int ndark, int nstar);
+
+int tipsy_write_star_particles(const float *mass,
+			       const float (*pos)[3],
+			       const float (*vel)[3],
+			       const float *metals,
+			       const float *tform,
+			       float	softening,
+			       size_t   size);
+
+int tipsy_write_dark_particles(const float *mass,
+			       const float (*pos)[3],
+			       const float (*vel)[3],
+			       float  softening,
+			       size_t size);
+
+int tipsy_write_gas_particles(const float *mass,
+			      const float (*pos)[3],
+			      const float (*vel)[3],
+			      const float *rho,
+			      const float *temp,
+			      const float *hsmooth,
+			      const float *metals,
+			      size_t       size);
+
+int tipsy_write_blackhole_particles(const float *mass,
+				    const float (*pos)[3],
+				    const float (*vel)[3],
+				    const float softening,
+				    size_t      size);
+

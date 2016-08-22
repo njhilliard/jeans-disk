@@ -128,7 +128,6 @@ class tipsy_blackhole_data(tipsy_struct):
 
 def load_tipsy():
     """Load the tipsy module. For internal use only """
-    
     if load_tipsy.is_loaded:
         return
     
@@ -146,6 +145,9 @@ def load_tipsy():
     
     lib = npct.load_library("libtipsy", "")
     
+    array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
+    array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
+    
     # Force parameter type-checking and return-value error checking
     lib.tipsy_get_last_system_error.restype = ctypes.c_char_p
     lib.tipsy_get_last_system_error.argtypes = []
@@ -160,17 +162,26 @@ def load_tipsy():
     lib.tipsy_close_file.argtypes = []
     
     lib.tipsy_write_header.restype = decode_err
-    lib.tipsy_write_header.argtypes = [ctypes.POINTER(tipsy_header)]
+    lib.tipsy_write_header.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int]
     
     lib.tipsy_write_star_particles.restype = decode_err
-    lib.tipsy_write_star_particles.argtypes = [ctypes.POINTER(tipsy_star_data)]
+    lib.tipsy_write_star_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
+                                               array_1d_float, array_1d_float, ctypes.c_float,
+                                               ctypes.c_size_t]
     
     lib.tipsy_write_dark_particles.restype = decode_err
-    lib.tipsy_write_dark_particles.argtypes = [ctypes.POINTER(tipsy_dark_data)]
+    lib.tipsy_write_dark_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
+                                               ctypes.c_float, ctypes.c_size_t]
     
     lib.tipsy_write_gas_particles.restype = decode_err
-    lib.tipsy_write_gas_particles.argtypes = [ctypes.POINTER(tipsy_gas_data)]
-  
+    lib.tipsy_write_gas_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
+                                              array_1d_float, array_1d_float, array_1d_float,
+                                              array_1d_float, ctypes.c_size_t]
+    
+    lib.tipsy_write_blackhole_particles.restype = decode_err
+    lib.tipsy_write_blackhole_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
+                                                    ctypes.c_float, ctypes.c_size_t]
+    
     lib.tipsy_read_header.restype = decode_err
     lib.tipsy_read_header.argtypes = [ctypes.POINTER(tipsy_header)]
     

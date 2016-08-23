@@ -168,68 +168,6 @@ int tipsy_write_header(double time, int ngas, int ndark, int nstar) {
 	return 0;
 }
 
-int tipsy_write_star_particles(const float *mass,
-			       const float (*pos)[3],
-			       const float (*vel)[3],
-			       const float *metals,
-			       const float *tform,
-			       float	softening,
-			       size_t       size) {
-
-	if (!tipsy_fd) { return TIPSY_WRITE_UNOPENED; }
-
-	tipsy_star_particle p;
-	for (size_t i = 0; i < size; ++i) {
-		p.mass      = mass[i];
-		p.pos[0]    = pos[i][0];
-		p.pos[1]    = pos[i][1];
-		p.pos[2]    = pos[i][2];
-		p.vel[0]    = vel[i][0];
-		p.vel[1]    = vel[i][1];
-		p.vel[2]    = vel[i][2];
-		p.softening = softening;
-		p.metals    = metals[i];
-		p.tform     = tform[i];
-		p.phi       = 0.0f;
-
-		if (fwrite(&p, sizeof(tipsy_star_particle), 1, tipsy_fd) != 1) {
-			tipsy_system_error = strerror(errno);
-			return TIPSY_BAD_WRITE;
-		}
-	}
-
-	return 0;
-}
-
-int tipsy_write_dark_particles(const float *mass,
-			       const float (*pos)[3],
-			       const float (*vel)[3],
-			       float  softening,
-			       size_t size) {
-
-	if (!tipsy_fd) { return TIPSY_WRITE_UNOPENED; }
-
-	tipsy_dark_particle p;
-	for (size_t i = 0; i < size; ++i) {
-		p.mass      = mass[i];
-		p.pos[0]    = pos[i][0];
-		p.pos[1]    = pos[i][1];
-		p.pos[2]    = pos[i][2];
-		p.vel[0]    = vel[i][0];
-		p.vel[1]    = vel[i][1];
-		p.vel[2]    = vel[i][2];
-		p.softening = softening;
-		p.phi       = 0.0f;
-
-		if (fwrite(&p, sizeof(tipsy_dark_particle), 1, tipsy_fd) != 1) {
-			tipsy_system_error = strerror(errno);
-			return TIPSY_BAD_WRITE;
-		}
-	}
-
-	return 0;
-}
-
 int tipsy_write_gas_particles(const float *mass,
 			      const float (*pos)[3],
 			      const float (*vel)[3],
@@ -237,7 +175,8 @@ int tipsy_write_gas_particles(const float *mass,
 			      const float *temp,
 			      const float *hsmooth,
 			      const float *metals,
-			      size_t       size) {
+				  const float *phi,
+			      const size_t size) {
 
 	if (!tipsy_fd) { return TIPSY_WRITE_UNOPENED; }
 
@@ -253,8 +192,8 @@ int tipsy_write_gas_particles(const float *mass,
 		p.rho     = rho[i];
 		p.temp    = temp[i];
 		p.hsmooth = hsmooth[i];
-		p.metals  = metals[i];
-		p.phi     = 0.0f;
+		p.metals  = (metals) ? metals[i] : 0.0f;
+		p.phi     = (phi) ? phi[i] : 0.0f;
 
 		if (fwrite(&p, sizeof(tipsy_gas_particle), 1, tipsy_fd) != 1) {
 			tipsy_system_error = strerror(errno);
@@ -265,13 +204,50 @@ int tipsy_write_gas_particles(const float *mass,
 	return 0;
 }
 
-int tipsy_write_blackhole_particles(const float *mass,
-				    const float (*pos)[3],
-				    const float (*vel)[3],
-				    const float softening,
-				    size_t      size) {
+int tipsy_write_dark_particles(const float *mass,
+			       const float (*pos)[3],
+			       const float (*vel)[3],
+				   const float *phi,
+			       const float  softening,
+			       const size_t size) {
 
 	if (!tipsy_fd) { return TIPSY_WRITE_UNOPENED; }
+
+	tipsy_dark_particle p;
+	for (size_t i = 0; i < size; ++i) {
+		p.mass      = mass[i];
+		p.pos[0]    = pos[i][0];
+		p.pos[1]    = pos[i][1];
+		p.pos[2]    = pos[i][2];
+		p.vel[0]    = vel[i][0];
+		p.vel[1]    = vel[i][1];
+		p.vel[2]    = vel[i][2];
+		p.softening = softening;
+		p.phi       = (phi) ? phi[i] : 0.0f;
+
+		if (fwrite(&p, sizeof(tipsy_dark_particle), 1, tipsy_fd) != 1) {
+			tipsy_system_error = strerror(errno);
+			return TIPSY_BAD_WRITE;
+		}
+	}
+
+	return 0;
+}
+
+int tipsy_write_star_particles(const float *mass,
+			       const float (*pos)[3],
+			       const float (*vel)[3],
+			       const float *metals,
+			       const float *tform,
+				   const float *phi,
+			       const float	softening,
+			       const size_t size,
+				   const int	is_blackhole) {
+
+	if (!tipsy_fd) { return TIPSY_WRITE_UNOPENED; }
+
+	// Negative tForm signals black hole to GASOLINE
+	const float tform_default = (is_blackhole) ? -1.0 : 0.0;
 
 	tipsy_star_particle p;
 	for (size_t i = 0; i < size; ++i) {
@@ -283,14 +259,16 @@ int tipsy_write_blackhole_particles(const float *mass,
 		p.vel[1]    = vel[i][1];
 		p.vel[2]    = vel[i][2];
 		p.softening = softening;
-		p.metals    = 0.0;
-		p.tform     = -1.0; // Negative tForm signals black hole to GASOLINE
-		p.phi       = 0.0f;
+		p.metals    = (metals) ? metals[i] : 0.0f;
+		p.tform     = (tform) ? tform[i] : tform_default;
+		p.phi       = (phi) ? phi[i] : 0.0f;
 
 		if (fwrite(&p, sizeof(tipsy_star_particle), 1, tipsy_fd) != 1) {
 			tipsy_system_error = strerror(errno);
 			return TIPSY_BAD_WRITE;
 		}
 	}
+
 	return 0;
 }
+

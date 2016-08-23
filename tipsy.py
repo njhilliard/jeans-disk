@@ -38,10 +38,6 @@ class File():
             _read_header()
         return self.hdr
 
-    @header.setter
-    def header(self, h):
-        self.hdr = h
-    
     @property
     def darkmatter(self):
         if self.hdr is None:
@@ -51,11 +47,7 @@ class File():
             self.dark_particles = tipsy_dark_data(self.hdr.ndark)
             self.lib.tipsy_read_dark_particles(ctypes.byref(self.dark_particles))
         return self.dark_particles
-    
-    @darkmatter.setter
-    def darkmatter(self, dp):
-        self.dark_particles = dp
-    
+        
     @property
     def stars(self):
         if self.hdr is None:
@@ -66,10 +58,6 @@ class File():
             self.lib.tipsy_read_star_particles(ctypes.byref(self.star_particles))
         return self.star_particles
 
-    @stars.setter
-    def stars(self, sd):
-        self.star_particles = sd
-    
     @property
     def gas(self):
         if self.hdr is None:
@@ -80,10 +68,6 @@ class File():
             self.lib.tipsy_read_gas_particles(ctypes.byref(self.gas_particles))
         return self.gas_particles
     
-    @gas.setter
-    def gas(self, gp):
-        self.gas_particles = gp
-
     def save(self):
         self.lib.tipsy_write_header(time, ngas, ndark, nstar)
         self.lib.tipsy_write_dark_particles(mass, pos, vel, softening, mass.shape[0])

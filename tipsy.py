@@ -11,9 +11,8 @@ class File():
         self.lib = load_tipsy()
         self.lib.tipsy_open_file(ctypes.c_char_p(bytes(filename, 'utf-8')),
                                  ctypes.c_char_p(bytes(mode, 'utf-8')))
-        self.hdr = tipsy_header()
-        self.lib.tipsy_read_header(ctypes.byref(self.hdr))
         
+        self.hdr = None
         self.dark_particles = None
         self.star_particles = None
         self.gas_particles = None
@@ -28,8 +27,15 @@ class File():
         self.close()
         return False  # always re-raise exceptions
     
+    def _read_header(self):
+        """For internal use only"""
+        self.hdr = tipsy_header()
+        self.lib.tipsy_read_header(ctypes.byref(self.hdr))
+    
     @property
     def header(self):
+        if self.hdr is None:
+            _read_header()
         return self.hdr
 
     @header.setter
@@ -38,6 +44,9 @@ class File():
     
     @property
     def darkmatter(self):
+        if self.hdr is None:
+            _read_header()
+            
         if self.dark_particles is None:
             self.dark_particles = tipsy_dark_data(self.hdr.ndark)
             self.lib.tipsy_read_dark_particles(ctypes.byref(self.dark_particles))
@@ -49,6 +58,9 @@ class File():
     
     @property
     def stars(self):
+        if self.hdr is None:
+            _read_header()
+
         if self.star_particles is None:
             self.star_particles = tipsy_star_data(self.hdr.nstar)
             self.lib.tipsy_read_star_particles(ctypes.byref(self.star_particles))
@@ -60,6 +72,9 @@ class File():
     
     @property
     def gas(self):
+        if self.hdr is None:
+            _read_header()
+            
         if self.gas_particles is None:
             self.gas_particles = tipsy_gas_data(self.hdr.ngas)
             self.lib.tipsy_read_gas_particles(ctypes.byref(self.gas_particles))

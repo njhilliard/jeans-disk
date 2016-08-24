@@ -4,6 +4,22 @@ import ctypes
 
 float_p = ctypes.POINTER(ctypes.c_float)
 
+_array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
+_array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
+
+def _from_param_1d(cls, obj):
+    if obj is None:
+        return obj
+    return _array_1d_float.from_param(obj)
+
+def _from_param_2d(cls, obj):
+    if obj is None:
+        return obj
+    return _array_2d_float.from_param(obj)
+
+array_1d_float = type('array_1d_float', (_array_1d_float,), {'from_param': classmethod(_from_param_1d)})
+array_2d_float = type('array_2d_float', (_array_2d_float,), {'from_param': classmethod(_from_param_2d)})
+    
 def tipsy_make_array(size, ndims=1, type=np.float32):
     if ndims == 1:
         return np.empty(size, dtype=type)
@@ -128,8 +144,8 @@ class tipsy_blackhole_data(tipsy_struct):
 
 def load_tipsy():
     """Load the tipsy module. For internal use only """
-    if load_tipsy.is_loaded:
-        return
+    if load_tipsy.lib is not None:
+        return load_tipsy.lib
     
     def decode_err(err):
         if err < 0:
@@ -144,9 +160,6 @@ def load_tipsy():
                 ))
     
     lib = npct.load_library("libtipsy", "")
-    
-    array_1d_float = npct.ndpointer(dtype=np.float32, ndim=1, flags='CONTIGUOUS')
-    array_2d_float = npct.ndpointer(dtype=np.float32, ndim=2, flags='CONTIGUOUS')
     
     # Force parameter type-checking and return-value error checking
     lib.tipsy_get_last_system_error.restype = ctypes.c_char_p
@@ -163,24 +176,20 @@ def load_tipsy():
     
     lib.tipsy_write_header.restype = decode_err
     lib.tipsy_write_header.argtypes = [ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    
-    lib.tipsy_write_star_particles.restype = decode_err
-    lib.tipsy_write_star_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                               array_1d_float, array_1d_float, ctypes.c_float,
-                                               ctypes.c_size_t]
-    
-    lib.tipsy_write_dark_particles.restype = decode_err
-    lib.tipsy_write_dark_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                               ctypes.c_float, ctypes.c_size_t]
-    
+
     lib.tipsy_write_gas_particles.restype = decode_err
     lib.tipsy_write_gas_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
                                               array_1d_float, array_1d_float, array_1d_float,
-                                              array_1d_float, ctypes.c_size_t]
+                                              array_1d_float, array_1d_float, ctypes.c_size_t]
+
+    lib.tipsy_write_dark_particles.restype = decode_err
+    lib.tipsy_write_dark_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
+                                               array_1d_float, ctypes.c_float, ctypes.c_size_t]
     
-    lib.tipsy_write_blackhole_particles.restype = decode_err
-    lib.tipsy_write_blackhole_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
-                                                    ctypes.c_float, ctypes.c_size_t]
+    lib.tipsy_write_star_particles.restype = decode_err
+    lib.tipsy_write_star_particles.argtypes = [array_1d_float, array_2d_float, array_2d_float,
+                                               array_1d_float, array_1d_float, array_1d_float,
+                                               ctypes.c_float, ctypes.c_size_t, ctypes.c_int]
     
     lib.tipsy_read_header.restype = decode_err
     lib.tipsy_read_header.argtypes = [ctypes.POINTER(tipsy_header)]
@@ -194,6 +203,6 @@ def load_tipsy():
     lib.tipsy_read_gas_particles.restype = decode_err
     lib.tipsy_read_gas_particles.argtypes = [ctypes.POINTER(tipsy_gas_data)]
     
-    load_tipsy.is_loaded = True
+    load_tipsy.lib = lib
     return lib
-load_tipsy.is_loaded = False
+load_tipsy.lib = None

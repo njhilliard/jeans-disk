@@ -3,7 +3,7 @@ CCSTD    =  -std=c99
 WFLAGS   = -Wall -Wextra -Wconversion -Wshadow
 OPTIMIZE = -O3 -march=native -mfpmath=sse -DNDEBUG -fPIC
 
-SRCS  = tipsy.c
+SRCS  = tipsyio.c
 OBJS := $(patsubst %.c, %.o, $(SRCS))
 LIB   = libtipsy.so
 

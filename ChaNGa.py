@@ -93,7 +93,7 @@ def convert_parameter_file(gadget_params):
 
 all_parameters = """
 #bBenchmark                                   Benchmark only; no output or checkpoints
-#bDoGravity                                   Enable Gravity
+#bDoGravity                                   Enable Gravity (default: 1)
 #bLiveViz                                     enable real-time simulation render support (disabled)
 #bPrintBinary                                 Print accelerations in Binary
 #bStaticTest                                  Static test of performance
@@ -132,7 +132,7 @@ all_parameters = """
 #dQuintess                                    <dQuintessence (constant w = -1/2) > (DEFAULT: 0.0)
 #dRedTo                                       specifies final redshift for the simulation
 #dSoftMax                                     maximum comoving gravitational softening length (abs or multiplier)
-#daSwitchTheta                                <a to switch theta at> (DEFAULT
+#daSwitchTheta                                <a to switch theta at> (DEFAULT: 1/3)
 #ddHonHLimit                                  <|dH|/H Limiter> (DEFAULT: 0.1)
 #dhMinOverSoft                                <Minimum h as a fraction of Softening> (DEFAULT: 0.0)
 #dxPeriod                                     <periodic box length in x-dimension> (DEFAULT: 1.0)
@@ -161,7 +161,7 @@ all_parameters = """
 #dEta                                         Time integration accuracy
 #iInitDecompBins                              Number of bins to use for the first iteration of every Oct decomposition step
 #nSteps                                       Number of Timesteps
-#nTruncateRung                                <number of MaxRung particles to delete MaxRung> (DEFAULT
+#nTruncateRung                                <number of MaxRung particles to delete MaxRung> (DEFAULT: 0)
 
 ####### Performance #######
 #bDoSimulateLB                                Should Orb3dLB simulate LB decisions from dumped text file and stop?

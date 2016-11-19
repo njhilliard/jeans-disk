@@ -5,6 +5,7 @@ __pycache__
 *.hdf5
 *.ps
 *.png
+*.tipsy
 
 # Eclipse folders
 .project

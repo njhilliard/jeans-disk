@@ -4,13 +4,12 @@ import gadget
 import ChaNGa
 import tipsy
 import argparse
-import os
 import astropy.units as apu
 import astropy.constants as apc
 import math
 import numpy as np
 
-def convert_U_to_temperature(gadget_params, gadget_file):
+def convert_U_to_temperature(gadget_params, gadget_file, hubble):
     # TODO: Check these units wrt the mass conversion between GADGET and ChaNGa
     units = {}
     units['Length_in_cm'] = float(gadget_params['UnitLength_in_cm']) / hubble
@@ -43,14 +42,7 @@ def convert_U_to_temperature(gadget_params, gadget_file):
     gas_temp *= constants['protonmass'] * mean_weight * units['Energy_in_cgs'] / units['Mass_in_g']
     return gas_temp
 
-def get_output_file(file_name):
-    input_dir, input_name = os.path.split(file_name)
-    input_file_basename, _ = os.path.splitext(input_name)
-    
-    if input_dir != '':
-        input_dir += '/'
-    
-    return input_dir + input_file_basename
+#-----------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser(description='Convert GADGET2 files to ChaNGa files')
 parser.add_argument('gadget_file', metavar='GADGET', help='GADGET2 HDF5 file to convert')
@@ -61,15 +53,13 @@ parser.add_argument('--no-param-list', action='store_true', help='Do not store a
 args = parser.parse_args()
 
 gadget_params = gadget.Parameter_file(args.param_file)
-changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params)
+changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params, args.gadget_file)
 
 gadget_file = gadget.File(args.gadget_file)
 changa_params['bDoGas'] = int(gadget_file.gas is not None)
 
-output_file = get_output_file(args.gadget_file)
-
 # Output the parameter file
-with open(output_file + '.ChaNGa.params', 'w') as f:
+with open(changa_params['achInFile'] + '.ChaNGa.params', 'w') as f:
     for k in sorted(changa_params):
          f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
 
@@ -90,7 +80,7 @@ if is_cosmological:
     if hubble == 0.0:
         hubble = 1.0
 
-with tipsy.streaming_writer(output_file + '.tipsy') as file:
+with tipsy.streaming_writer(changa_params['achInFile']) as file:
     ngas = ndark = nstar = 0
     
     # just a placeholder
@@ -99,7 +89,7 @@ with tipsy.streaming_writer(output_file + '.tipsy') as file:
     if gadget_file.gas is not None:
         gas = gadget_file.gas
         ngas += gas.size
-        gas_temp = convert_U_to_temperature(gadget_params, gadget_file)
+        gas_temp = convert_U_to_temperature(gadget_params, gadget_file, hubble)
         gas.mass *= mass_scale
         gas.velocities *= velocity_scale
         file.gas(gas.mass, gas.positions, gas.velocities, gas.density, gas_temp, gas.hsml, gas.metals, gas.potential, gas.size)
@@ -172,5 +162,5 @@ with tipsy.streaming_writer(output_file + '.tipsy') as file:
                    gadget_params['SofteningBndry'], boundary.size, is_blackhole=True)
 
 # update the header
-with tipsy.streaming_writer(output_file + '.tipsy', 'r+b') as file:
+with tipsy.streaming_writer(changa_params['achInFile'], 'r+b') as file:
     file.header(time, ngas, ndark, nstar)

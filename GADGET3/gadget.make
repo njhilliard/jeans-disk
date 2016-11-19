@@ -27,9 +27,6 @@ OPT	+=  -DHAVE_HDF5
 #OPT	+=  -DNAVIERSTOKES_BULK       # Bulk viscosity set constant for all gas particles. To run with bulk visocity only one has to set shear viscosity to zero in the parameterfile.
 #OPT	+=  -DVISCOSITY_SATURATION    # Both shear and bulk viscosities are saturated, so that unphysical accelerations and entropy increases are avoided. Relevant for the cosmological simulations.
 #OPT	+=  -DNS_TIMESTEP             # Enables timestep criterion based on entropy increase due to internal friction forces
-#OPT	+=  -DOUTPUTSTRESS            # Outputs diagonal and offdiagonal components of viscous shear stress tensor
-#OPT	+=  -DOUTPUTBULKSTRESS        # Outputs viscous bulk stress tensor
-#OPT	+=  -DOUTPUTSHEARCOEFF        # Outputs variable shear viscosity coefficient in internal code units
 
 #-------------------------------------------- Things for special behaviour
 #OPT	+=  -DTRADITIONAL_SPH_FORMULATION
@@ -59,10 +56,6 @@ OPT	+=  -DHAVE_HDF5
 #OPT	+=  -DNOWINDTIMESTEPPING            # Disable wind reducing timestep (not recommended)
 #OPT	+=  -DNOPMSTEPADJUSTMENT
 #OPT	+=  -DFORCE_EQUAL_TIMESTEPS
-
-#--------------------------------------- Output/Input options
-#OPT	+=  -DOUTPUTCOOLRATE                # outputs cooling rate, and conduction rate if enabled
-#OPT	+=  -DOUTPUTDENSNORM
 
 #--------------------------------------- SPH viscosity options
 #OPT	+=  -DCONVENTIONAL_VISCOSITY     # enables the old viscosity

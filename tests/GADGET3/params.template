@@ -1,16 +1,3 @@
-CritPhysDensity                    0
-MaxSfrTimescale                    4.5
-CritOverDensity                    57.7
-TempSupernova                      3e+08
-TempClouds                         1000
-FactorSN                           0.1
-FactorEVP                          3000
-WindEfficiency                     0.005
-WindEnergyFraction                 0.0025
-WindFreeTravelDensFac              0.1
-WindFreeTravelMaxTimeFactor        1
-FactorForSofterEQS                 1
-
 SofteningGas        0.07
 SofteningHalo       0.1
 SofteningDisk       0.1
@@ -18,8 +5,6 @@ SofteningBulge      0
 SofteningStars      0.1
 SofteningBndry		0
 
-InitCondFile      snap_000
-SnapshotFileBase  snap
 EnergyFile        energy.txt
 InfoFile          info.txt
 TimingsFile       timings.txt
@@ -27,53 +12,36 @@ CpuFile           cpu.txt
 TimebinFile       timebins.txt
 RestartFile       restart
 
-%  Relevant files
-OutputDir         .
-
 % CPU-time limit
 TimeLimitCPU      345600  % 96 hours
 ResubmitOn        0
 ResubmitCommand   xxx
 
 % Code options
-
 ICFormat                  3
-SnapFormat                1
+SnapFormat                3
 NumFilesPerSnapshot       1
 NumFilesWrittenInParallel 1
-
 ComovingIntegrationOn     0
 
-CoolingOn                 1 
-StarformationOn           1
-
 %  Caracteristics of run
-
 TimeBegin                 0.0 
-TimeMax                   0.5
-
 Omega0                    0
 OmegaLambda               0
 OmegaBaryon               0
 HubbleParam               1.0
-
 BoxSize                   0  
 PeriodicBoundariesOn      0
 
 % Output frequency
 OutputListOn              0   
 OutputListFilename        none 
-
-TimeBetSnapshot           5.0
-TimeOfFirstSnapshot       5.0
 CpuTimeBetRestartFile     21600.0
 TimeBetStatistics         0.05
 
 % Accuracy of time integration
-
 TypeOfTimestepCriterion   0
 ErrTolIntAccuracy         0.012 
-MaxSizeTimestep           0.005
 MinSizeTimestep           1.0e-8
 MaxRMSDisplacementFac     0.25
 
@@ -92,7 +60,6 @@ DesNumNgb           32
 MaxNumNgbDeviation  1
 
 % Further code parameters
-
 PartAllocFactor     3.0
 BufferSize          300
 MaxMemSize 			4000
@@ -105,10 +72,22 @@ GravityConstantInternal  0
 
 % Softening lengths
 MinGasHsmlFractional     0.0  % minimum gas smoothing in terms of the gravitational softening length
-
 SofteningGasMaxPhys       0
 SofteningBulgeMaxPhys     0
 SofteningStarsMaxPhys     0
 SofteningBndryMaxPhys     0
 SofteningHaloMaxPhys      0
 SofteningDiskMaxPhys      0
+
+CritPhysDensity                    0
+MaxSfrTimescale                    4.5
+CritOverDensity                    57.7
+TempSupernova                      3e+08
+TempClouds                         1000
+FactorSN                           0.1
+FactorEVP                          3000
+WindEfficiency                     0.005
+WindEnergyFraction                 0.0025
+WindFreeTravelDensFac              0.1
+WindFreeTravelMaxTimeFactor        1
+FactorForSofterEQS                 1

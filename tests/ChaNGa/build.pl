@@ -9,18 +9,15 @@ sub execute($) {
 	croak "\n\nError executing \n\t'$cmd'\n\n" if ( ( $? >> 8 ) != 0 || $? == -1 || ( $? & 127 ) != 0 );
 }
 
-my ( $cuda, $charm, $changa, $clean, $smp, $float ) = ( '', 1, 1, 0 , 1, 0);
+my ($charm, $changa, $clean, $smp, $njobs ) = ( 1, 1, 0 , 1, 2);
 GetOptions(
-	'with-cuda' => \$cuda,
 	'charm!'    => \$charm,
 	'changa!'   => \$changa,
 	'clean'     => \$clean,
 	'smp!'		=> \$smp,
-	'float'		=> \$float
+	'njobs=i'	=> \$njobs
 ) or exit;
-$cuda = 'cuda' if $cuda;
 $smp  = ($smp) ? 'smp' : '';
-$float = ($float) ? '--enable-float' : '';
 
 if ($clean) {
 	execute( "
@@ -35,15 +32,14 @@ if ($clean) {
 if ($charm) {
 	execute( "
 		cd charm
-		./build ChaNGa net-linux-x86_64 $cuda $smp --enable-lbuserdata -j2 -optimize
+		./build ChaNGa net-linux-x86_64 $smp --enable-lbuserdata -j$njobs -optimize
 	" );
 }
 
 if ($changa) {
-	my $cuda_conf = ($cuda) ? "--with-cuda=$ENV{CRAY_CUDATOOLKIT_DIR}" : '';
 	execute( "
 		cd changa
-		./configure $cuda_conf $float
-		make -j2
+		./configure
+		make -j$njobs
 	" );
 }

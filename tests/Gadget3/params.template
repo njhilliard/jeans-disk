@@ -79,15 +79,3 @@ SofteningBndryMaxPhys     0
 SofteningHaloMaxPhys      0
 SofteningDiskMaxPhys      0
 
-CritPhysDensity                    0
-MaxSfrTimescale                    4.5
-CritOverDensity                    57.7
-TempSupernova                      3e+08
-TempClouds                         1000
-FactorSN                           0.1
-FactorEVP                          3000
-WindEfficiency                     0.005
-WindEnergyFraction                 0.0025
-WindFreeTravelDensFac              0.1
-WindFreeTravelMaxTimeFactor        1
-FactorForSofterEQS                 1

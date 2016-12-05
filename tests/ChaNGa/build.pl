@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use File::Copy qw(copy);
 use Getopt::Long qw(GetOptions);
 
 sub execute($) {
@@ -19,27 +20,38 @@ GetOptions(
 ) or exit;
 $smp  = ($smp) ? 'smp' : '';
 
-if ($clean) {
-	execute( "
-		cd charm
-		rm -rf bin include lib lib_so tmp VERSION net-linux*
-	" );
-	execute( "
-		cd changa
-		rm -f *.a *.o config.status Makefile.dep Makefile cuda.mk ChaNGa charmrun
-	" );
-}
 if ($charm) {
+	if ($clean) {
+		print("Cleaning charm...\n");
+		execute( "
+			cd src/charm
+			rm -rf bin include lib lib_so tmp VERSION net-linux*
+		" );
+	}
 	execute( "
-		cd charm
+		cd src/charm
 		./build ChaNGa net-linux-x86_64 $smp --enable-lbuserdata -j$njobs -optimize
 	" );
 }
 
 if ($changa) {
-	execute( "
-		cd changa
-		./configure
-		make -j$njobs
-	" );
+	if ($clean) {
+		print("Cleaning changa...\n");
+		execute( "
+			cd src/changa
+			rm -f *.a *.o config.status Makefile.dep Makefile cuda.mk ChaNGa charmrun
+		" );
+	}
+	
+	execute("cd src/changa; make depends;");
+	
+	sub build($) {
+		my ($conf) = @_;
+		execute("cd src/changa; make clean; ./configure $conf; make -j$njobs");
+	}
+	build('');
+	copy('src/changa/ChaNGa', 'nogas/') or die;
+	copy('src/changa/ChaNGa', 'gas/') or die;
+	build('--cooling=cosmo');
+	copy('src/changa/ChaNGa', 'gas+sfr/') or die;	
 }

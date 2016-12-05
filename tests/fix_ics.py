@@ -1,20 +1,31 @@
 import h5py
-from shutil import copyfile
-import sys
+import argparse
 
-if len(sys.argv) != 2:
-    print("Usage: {0:s} input_file".format(sys.argv[0]))
-    exit()
+parser = argparse.ArgumentParser()
+parser.add_argument('input_file', metavar='input', help='Gadget3 input file')
+parser.add_argument('--nogas', action='store_true')
+parser.add_argument('--sfr', action='store_true')
+args = parser.parse_args()
 
-input_file = sys.argv[1]
-temp_file = input_file + '.tmp'
-
-copyfile(input_file, temp_file)
-
-with h5py.File(temp_file, "r+") as f:
-    del f['PartType0']
-    f['Header'].attrs.modify('Flag_Cooling', 0)
-    f['Header'].attrs.modify('Flag_Feedback', 0)
+def set_sfr_params(f, val):
+    f['Header'].attrs.modify('Flag_Cooling', val)
+    f['Header'].attrs.modify('Flag_Feedback', val)
+    f['Header'].attrs.modify('Flag_Sfr', val)
+    f['Header'].attrs.modify('Flag_StellarAge', val)
+        
+with h5py.File(args.input_file, "r+") as f:
     f['Header'].attrs.modify('Flag_Metals', 0)
-    f['Header'].attrs.modify('Flag_Sfr', 0)
-    f['Header'].attrs.modify('Flag_StellarAge', 0)
+
+    set_sfr_params(f, int(args.sfr))
+   
+    if (args.nogas):
+        numpart = f['Header'].attrs['NumPart_Total']
+        numpart[0] = 0
+        f['Header'].attrs.modify('NumPart_Total', numpart)
+        numpart = f['Header'].attrs['NumPart_ThisFile']
+        numpart[0] = 0
+        f['Header'].attrs.modify('NumPart_ThisFile', numpart)
+        masses = f['Header'].attrs['MassTable']
+        masses[0] = 0
+        f['Header'].attrs.modify('MassTable', masses)    
+        del f['PartType0']

@@ -9,7 +9,8 @@ static tipsy_header hdr;
 
 static void tipsy_reset_fd(long offset) {
 	rewind(tipsy_fd);
-	do {int i = fseek(tipsy_fd, offset, SEEK_SET); } while(0);
+	int i = fseek(tipsy_fd, offset, SEEK_SET);
+	(void)i;
 }
 
 const char *tipsy_get_last_system_error() { return tipsy_system_error; }
@@ -79,9 +80,9 @@ int tipsy_read_star_particles(tipsy_star_data *d) {
 
 	tipsy_star_particle p;
 	const size_t size = d->size;
-	const long offset = sizeof(tipsy_header) +
-						hdr.ngas * sizeof(tipsy_gas_particle) +
-					    hdr.ndark * sizeof(tipsy_dark_particle);
+	const long offset = (int)sizeof(tipsy_header) +
+						hdr.ngas * (int)sizeof(tipsy_gas_particle) +
+					    hdr.ndark * (int)sizeof(tipsy_dark_particle);
 	tipsy_reset_fd(offset);
 	for (size_t i = 0; i < size; ++i) {
 		if (fread(&p, sizeof(tipsy_star_particle), 1, tipsy_fd) != 1) {
@@ -109,7 +110,7 @@ int tipsy_read_dark_particles(tipsy_dark_data *d) {
 
 	tipsy_dark_particle p;
 	const size_t size = d->size;
-	tipsy_reset_fd(sizeof(tipsy_header) + hdr.ngas * sizeof(tipsy_gas_particle));
+	tipsy_reset_fd((int)sizeof(tipsy_header) + hdr.ngas * (int)sizeof(tipsy_gas_particle));
 	for (size_t i = 0; i < size; ++i) {
 		if (fread(&p, sizeof(tipsy_dark_particle), 1, tipsy_fd) != 1) {
 			tipsy_system_error = strerror(errno);

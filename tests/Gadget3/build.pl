@@ -1,7 +1,7 @@
 use strict;
 use warnings;
-use Cwd qw(cwd);
 use File::Copy qw(copy);
+use Getopt::Long qw(GetOptions);
 
 sub execute($) {
 	my $cmd = shift;
@@ -9,6 +9,9 @@ sub execute($) {
 	use Carp qw(croak);
 	croak "\n\nError executing \n\t'$cmd'\n\n" if ( ( $? >> 8 ) != 0 || $? == -1 || ( $? & 127 ) != 0 );
 }
+
+my $njobs = 2;
+GetOptions('njobs=i' => \$njobs) or exit;
 
 my $header = qq(
 OPT	+=  -DUNEQUALSOFTENINGS
@@ -26,7 +29,7 @@ OPT	+=  -DHAVE_HDF5
 );
 
 sub build() {
-	execute("cd src; make clean; make -j12");
+	execute("cd src; make clean; make -j$njobs");
 }
 
 open my $fdOut, '>', 'src/gadget.make' or die;
@@ -47,4 +50,4 @@ OPT	+=  -DSTELLARAGE
 );
 close $fdOut;
 build();
-copy('src/Gadget3/Gadget3', 'gas+sfr/') or die;
+copy('src/Gadget3', 'gas+sfr/') or die;

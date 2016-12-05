@@ -65,8 +65,10 @@ changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params, args.ga
 gadget_file = gadget.File(args.gadget_file)
 changa_params['bDoGas'] = int(gadget_file.gas is not None)
 
+basename = args.out_dir + '/' + ChaNGa.get_input_file(args.gadget_file) + '.tipsy'
+
 # Output the parameter file
-with open(changa_params['achInFile'] + '.ChaNGa.params', 'w') as f:
+with open(basename + '.ChaNGa.params', 'w') as f:
     for k in sorted(changa_params):
          f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
 
@@ -87,7 +89,7 @@ if is_cosmological:
     if hubble == 0.0:
         hubble = 1.0
 
-with tipsy.streaming_writer(changa_params['achInFile']) as file:
+with tipsy.streaming_writer(basename) as file:
     ngas = ndark = nstar = 0
     
     # just a placeholder
@@ -169,5 +171,5 @@ with tipsy.streaming_writer(changa_params['achInFile']) as file:
                    gadget_params['SofteningBndry'], boundary.size, is_blackhole=True)
 
 # update the header
-with tipsy.streaming_writer(changa_params['achInFile'], 'r+b') as file:
+with tipsy.streaming_writer(basename, 'r+b') as file:
     file.header(time, ngas, ndark, nstar)

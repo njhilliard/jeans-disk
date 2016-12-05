@@ -50,12 +50,8 @@ def convert_parameter_file(gadget_params, gadget_file, output_directory):
             if k in gadget_trans_table:
                 changa_params[gadget_trans_table[k]] = v
         
-        # mash together gadget directory output and file prefix
-        _ = gadget_params['OutputDir'] + '/'
-        changa_params['achOutFile'] = _ + gadget_params['SnapshotFileBase']
-        
-        # add tipsy suffix to input file
-        changa_params['achInFile'] = output_directory + '/' + get_input_file(gadget_file) + '.tipsy'
+        changa_params['achOutFile'] = output_directory + '/' + gadget_params['SnapshotFileBase']
+        changa_params['achInFile']  = output_directory + '/' + get_input_file(gadget_file) + '.tipsy'
         
         # wall runtime limit seconds to minutes
         changa_params['iWallRunTime'] = int(float(gadget_params['TimeLimitCPU']) / 60.0)

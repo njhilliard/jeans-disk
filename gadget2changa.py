@@ -1,4 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
+import sys
+
+if sys.version_info.major < 3:
+    print('python3 required!')
+    exit()
 
 import gadget
 import ChaNGa

@@ -47,13 +47,14 @@ def convert_U_to_temperature(gadget_params, gadget_file, hubble):
 parser = argparse.ArgumentParser(description='Convert GADGET2 files to ChaNGa files')
 parser.add_argument('gadget_file', metavar='GADGET', help='GADGET2 HDF5 file to convert')
 parser.add_argument('param_file', metavar='Parameter', help='GADGET2 parameter file to convert')
+parser.add_argument('out_dir', metavar='out_dir', help='Location of output')
 parser.add_argument('--convert-bh', action='store_true', help='Treat boundary particles as black holes')
 parser.add_argument('--preserve-boundary-softening', action='store_true', help='Preserve softening lengths for boundary particles')
 parser.add_argument('--no-param-list', action='store_true', help='Do not store a complete list ChaNGa parameters in "param_file"')
 args = parser.parse_args()
 
 gadget_params = gadget.Parameter_file(args.param_file)
-changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params, args.gadget_file)
+changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params, args.gadget_file, args.out_dir)
 
 gadget_file = gadget.File(args.gadget_file)
 changa_params['bDoGas'] = int(gadget_file.gas is not None)

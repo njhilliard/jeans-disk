@@ -34,15 +34,11 @@ gadget_trans_table = {
 }
 
 def get_input_file(file_name):
-    input_dir, input_name = os.path.split(file_name)
+    _, input_name = os.path.split(file_name)
     input_file_basename, _ = os.path.splitext(input_name)
-    
-    if input_dir != '':
-        input_dir += '/'
-    
-    return input_dir + input_file_basename
+    return input_file_basename
 
-def convert_parameter_file(gadget_params, gadget_file):
+def convert_parameter_file(gadget_params, gadget_file, output_directory):
         """Convert parameter values"""
         
         if not isinstance(gadget_params, gadget.Parameter_file):
@@ -59,7 +55,7 @@ def convert_parameter_file(gadget_params, gadget_file):
         changa_params['achOutFile'] = _ + gadget_params['SnapshotFileBase']
         
         # add tipsy suffix to input file
-        changa_params['achInFile'] = get_input_file(gadget_file) + '.tipsy'
+        changa_params['achInFile'] = output_directory + '/' + get_input_file(gadget_file) + '.tipsy'
         
         # wall runtime limit seconds to minutes
         changa_params['iWallRunTime'] = int(float(gadget_params['TimeLimitCPU']) / 60.0)

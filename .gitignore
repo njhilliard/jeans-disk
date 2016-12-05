@@ -6,6 +6,7 @@ __pycache__
 *.ps
 *.png
 *.tipsy
+*.params
 
 # Eclipse folders
 .project

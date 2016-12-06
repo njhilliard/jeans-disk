@@ -22,7 +22,7 @@ $(LIB): $(OBJS)
 
 .PHONY: dist
 dist:
-	@ tar -zc --exclude='*.hdf5' -f g2c.tar.gz $(SRCS) *.h *.py Makefile tests
+	@ tar -zc --exclude='*.hdf5' --exclude='*.tipsy' -f g2c.tar.gz $(SRCS) *.h *.py Makefile tests
 
 .PHONY: clean
 clean:

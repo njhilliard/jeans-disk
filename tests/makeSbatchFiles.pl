@@ -5,7 +5,6 @@ use Cwd qw(cwd);
 my $num_tasks = 128;
 my $tasks_per_node = 16;
 my $num_nodes = $num_tasks / $tasks_per_node;
-my $num_threads = $tasks_per_node - 2;
 
 my $base_dir = cwd();
 
@@ -36,5 +35,5 @@ for my $type ('nogas', 'gas', 'gas+sfr') {
 	
 	open $fdOut, '>', "$type.ChaNGa.sbatch" or die "Unable to create $base_dir/$type.ChaNGa.sbatch: $!\n";
 	write_header($fdOut, $type, "$base_dir/ChaNGa/$type");
-	print $fdOut "$base_dir/ChaNGa/$type/charmrun ++ppn $num_threads +p $num_nodes $base_dir/ChaNGa/$type/ChaNGa -v 1 $base_dir/ChaNGa/$type/$type.tipsy.ChaNGa.params\n\n";
+	print $fdOut "$base_dir/ChaNGa/$type/charmrun ++mpiexec $base_dir/ChaNGa/$type/ChaNGa -v 1 $base_dir/ChaNGa/$type/$type.tipsy.ChaNGa.params\n\n";
 }

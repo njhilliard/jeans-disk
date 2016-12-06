@@ -7,7 +7,7 @@ from astropy.constants import G as G_u
 # Translation table between GADGET and ChaNGa parameter names
 gadget_trans_table = {
     'InitCondFile'          : 'achInFile',
-    'SnapshotFileBase'      : 'achOutFile',
+    'SnapshotFileBase'      : 'achOutName',
     'TimeLimitCPU'          : 'iWallRunTime',
     'ComovingIntegrationOn' : 'bComove',
     'CoolingOn'             : 'bGasCooling',
@@ -50,7 +50,7 @@ def convert_parameter_file(gadget_params, gadget_file, output_directory):
             if k in gadget_trans_table:
                 changa_params[gadget_trans_table[k]] = v
         
-        changa_params['achOutFile'] = output_directory + '/' + gadget_params['SnapshotFileBase']
+        changa_params['achOutName'] = output_directory + '/' + gadget_params['SnapshotFileBase'] + '.out'
         changa_params['achInFile']  = output_directory + '/' + get_input_file(gadget_file) + '.tipsy'
         
         # wall runtime limit seconds to minutes

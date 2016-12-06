@@ -70,7 +70,7 @@ basename = args.out_dir + '/' + ChaNGa.get_input_file(args.gadget_file) + '.tips
 # Output the parameter file
 with open(basename + '.ChaNGa.params', 'w') as f:
     for k in sorted(changa_params):
-         f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
+         f.write('{0:20s} = {1:s}\n'.format(k, str(changa_params[k])))
 
     if not args.no_param_list:
         f.write('\n# Complete parameter list below\n')

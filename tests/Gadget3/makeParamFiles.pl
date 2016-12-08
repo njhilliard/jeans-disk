@@ -30,9 +30,9 @@ for my $type (keys %config) {
 	
 	open my $fdOut, '>', "$dir/${type}.params" or die "Unable to create $dir/${type}.params: $!\n";
 	print $fdOut <<EOF
-InitCondFile		/home/thaines2/g2c/tests/Gadget3/$type
+InitCondFile		$dir/$type
 SnapshotFileBase	$type
-OutputDir			/home/thaines2/g2c/tests/Gadget3
+OutputDir			$dir
 TimeMax				$sim_time
 CoolingOn			$config{$type}{'cooling'}
 StarformationOn		$config{$type}{'starformation'}

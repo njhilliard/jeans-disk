@@ -46,6 +46,8 @@ def convert_U_to_temperature(gadget_params, gadget_file, hubble):
     
     gas_temp = constants['gamma_minus1'] / constants['boltzmann'] * gadget_file.gas.internal_energy / gadget_file.gas.mass
     gas_temp *= constants['protonmass'] * mean_weight * units['Energy_in_cgs'] / units['Mass_in_g']
+    gas_temp[gas_temp < float(gadget_params['MinGasTemp'])] = float(gadget_params['MinGasTemp']) 
+
     return gas_temp
 
 #-----------------------------------------------------------------------------
@@ -57,14 +59,19 @@ parser.add_argument('out_dir', metavar='out_dir', help='Location of output')
 parser.add_argument('--convert-bh', action='store_true', help='Treat boundary particles as black holes')
 parser.add_argument('--preserve-boundary-softening', action='store_true', help='Preserve softening lengths for boundary particles')
 parser.add_argument('--no-param-list', action='store_true', help='Do not store a complete list ChaNGa parameters in "param_file"')
+parser.add_argument('--generations', type=int, help='Number of generations of stars each gas particle can spawn (see GENERATIONS in Gadget)')
+parser.add_argument('--viscosity', action='store_true', help='Use artificial bulk viscosity')
 args = parser.parse_args()
 
-gadget_params = gadget.Parameter_file(args.param_file)
-changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params, args.gadget_file, args.out_dir)
+try:
+    gadget_params = gadget.Parameter_file(args.param_file)
+except Exception as e:
+    print('\nERROR: {0:s}\n\n'.format(str(e)))
+    parser.print_help()
+    exit()
 
 gadget_file = gadget.File(args.gadget_file)
-changa_params['bDoGas'] = int(gadget_file.gas is not None)
-
+changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params, args, gadget_file.gas is not None)
 basename = args.out_dir + '/' + ChaNGa.get_input_file(args.gadget_file) + '.tipsy'
 
 # Output the parameter file

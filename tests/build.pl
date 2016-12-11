@@ -46,6 +46,7 @@ execute('python3 fix_ics.py --sfr snap_000.hdf5.tmp');
 execute('h5repack snap_000.hdf5.tmp Gadget3/gas+sfr/gas+sfr.hdf5');
 unlink 'snap_000.hdf5.tmp';
 
-for my $t ('nogas', 'gas', 'gas+sfr') {
+for my $t ('nogas', 'gas') {
 	execute("python3 ../gadget2changa.py --no-param-list Gadget3/$t/$t.hdf5 Gadget3/$t/$t.params ChaNGa/$t");
 }
+execute("python3 ../gadget2changa.py --no-param-list --generations=6 Gadget3/gas+sfr/gas+sfr.hdf5 Gadget3/gas+sfr/gas+sfr.params ChaNGa/gas+sfr");

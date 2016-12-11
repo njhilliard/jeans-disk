@@ -18,6 +18,20 @@ my %config = (
 	}
 );
 
+my $sfr_params = "
+CritPhysDensity                    0
+MaxSfrTimescale                    4.5
+CritOverDensity                    57.7
+TempSupernova                      3e+08
+TempClouds                         1000
+FactorSN                           0.1
+FactorEVP                          3000
+WindEfficiency                     0.005
+WindEnergyFraction                 0.0025
+WindFreeTravelDensFac              0.1
+WindFreeTravelMaxTimeFactor        1
+";
+
 my $base_dir = cwd();
 
 my $sim_time 	  = 0.500;	# 500 Myrs
@@ -45,4 +59,6 @@ EOF
 	open my $fdIn, '<', "$base_dir/params.template" or die "Unable to open $base_dir/params.template: $!\n";
 	$/ = undef; #slurp
 	print $fdOut (<$fdIn>);
+	
+	print $fdOut $sfr_params if $type eq 'gas+sfr';
 }

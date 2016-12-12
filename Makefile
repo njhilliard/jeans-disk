@@ -27,7 +27,7 @@ dist:
 .PHONY: clean
 clean:
 	@ echo Cleaning...
-	@ rm -f $(OBJS)
+	@ $(RM) $(OBJS) *.pyc
 
 .PHONY: dist-clean
 dist-clean: clean

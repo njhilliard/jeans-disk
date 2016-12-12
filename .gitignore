@@ -1,8 +1,12 @@
 __pycache__
 *.pyc
-gad-to-cha/ChaNGa.params
 *.o
 *.so
+*.hdf5
+*.ps
+*.png
+*.tipsy
+*.params
 
 # Eclipse folders
 .project
@@ -13,5 +17,3 @@ gad-to-cha/ChaNGa.params
 # test files
 test.cpp
 test.py
-GADGET/
-ChaNGa/

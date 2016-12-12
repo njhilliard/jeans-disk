@@ -120,7 +120,7 @@ class Parameter_file():
                 line = line.strip()
                 if line == '':
                     continue
-                name, value, *_ = line.split()
+                name, value = (line.split())[:2]
                 if '%' in name:
                     continue
                 self.data[name] = value

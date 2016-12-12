@@ -7,9 +7,9 @@ SRCS  = tipsyio.c
 OBJS := $(patsubst %.c, %.o, $(SRCS))
 LIB   = libtipsy.so
 
-.DEFAULT_GOAL = all
+.DEFAULT_GOAL := all
 
-.PHONY = all
+.PHONY: all
 all: $(LIB)
 
 $(LIB): $(OBJS)
@@ -18,13 +18,17 @@ $(LIB): $(OBJS)
 
 %.o: %.c
 	@ echo Compiling $<...
-	@ $(CC) $(CCSTD) $(CFLAGS) $(OPTIMIZE) -c $< -o $@
+	@ $(CC) $(CCSTD) $(OPTIMIZE) $(WFLAGS) $(CFLAGS) -c $< -o $@
 
-.PHONY = clean
+.PHONY: dist
+dist:
+	@ tar -zc --exclude='*.hdf5' --exclude='*.tipsy' -f g2c.tar.gz $(SRCS) *.h *.py Makefile tests
+
+.PHONY: clean
 clean:
 	@ echo Cleaning...
-	@ rm -f $(OBJS)
+	@ $(RM) $(OBJS) *.pyc
 
-.PHONY = dist-clean
+.PHONY: dist-clean
 dist-clean: clean
-	@ rm -f $(LIB)
+	@ $(RM) $(LIB)

@@ -1,16 +1,21 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
+import sys
+
+if sys.version_info.major < 3:
+    print('python3 required!')
+    exit()
 
 import gadget
 import ChaNGa
 import tipsy
 import argparse
-import os
 import astropy.units as apu
 import astropy.constants as apc
 import math
 import numpy as np
 
-def convert_U_to_temperature(gadget_params, gadget_file):
+def convert_U_to_temperature(gadget_params, gadget_file, hubble):
     # TODO: Check these units wrt the mass conversion between GADGET and ChaNGa
     units = {}
     units['Length_in_cm'] = float(gadget_params['UnitLength_in_cm']) / hubble
@@ -41,37 +46,38 @@ def convert_U_to_temperature(gadget_params, gadget_file):
     
     gas_temp = constants['gamma_minus1'] / constants['boltzmann'] * gadget_file.gas.internal_energy / gadget_file.gas.mass
     gas_temp *= constants['protonmass'] * mean_weight * units['Energy_in_cgs'] / units['Mass_in_g']
+    gas_temp[gas_temp < float(gadget_params['MinGasTemp'])] = float(gadget_params['MinGasTemp']) 
+
     return gas_temp
 
-def get_output_file(file_name):
-    input_dir, input_name = os.path.split(file_name)
-    input_file_basename, _ = os.path.splitext(input_name)
-    
-    if input_dir != '':
-        input_dir += '/'
-    
-    return input_dir + input_file_basename
+#-----------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser(description='Convert GADGET2 files to ChaNGa files')
 parser.add_argument('gadget_file', metavar='GADGET', help='GADGET2 HDF5 file to convert')
 parser.add_argument('param_file', metavar='Parameter', help='GADGET2 parameter file to convert')
+parser.add_argument('out_dir', metavar='out_dir', help='Location of output')
 parser.add_argument('--convert-bh', action='store_true', help='Treat boundary particles as black holes')
 parser.add_argument('--preserve-boundary-softening', action='store_true', help='Preserve softening lengths for boundary particles')
 parser.add_argument('--no-param-list', action='store_true', help='Do not store a complete list ChaNGa parameters in "param_file"')
+parser.add_argument('--generations', type=int, help='Number of generations of stars each gas particle can spawn (see GENERATIONS in Gadget)')
+parser.add_argument('--viscosity', action='store_true', help='Use artificial bulk viscosity')
 args = parser.parse_args()
 
-gadget_params = gadget.Parameter_file(args.param_file)
-changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params)
+try:
+    gadget_params = gadget.Parameter_file(args.param_file)
+except Exception as e:
+    print('\nERROR: {0:s}\n\n'.format(str(e)))
+    parser.print_help()
+    exit()
 
 gadget_file = gadget.File(args.gadget_file)
-changa_params['bDoGas'] = int(gadget_file.gas is not None)
-
-output_file = get_output_file(args.gadget_file)
+changa_params, mass_scale = ChaNGa.convert_parameter_file(gadget_params, args, gadget_file.gas is not None)
+basename = args.out_dir + '/' + ChaNGa.get_input_file(args.gadget_file) + '.tipsy'
 
 # Output the parameter file
-with open(output_file + '.ChaNGa.params', 'w') as f:
+with open(basename + '.ChaNGa.params', 'w') as f:
     for k in sorted(changa_params):
-         f.write('{0:20s}{1:s}\n'.format(k, str(changa_params[k])))
+         f.write('{0:20s} = {1:s}\n'.format(k, str(changa_params[k])))
 
     if not args.no_param_list:
         f.write('\n# Complete parameter list below\n')
@@ -90,7 +96,7 @@ if is_cosmological:
     if hubble == 0.0:
         hubble = 1.0
 
-with tipsy.streaming_writer(output_file + '.tipsy') as file:
+with tipsy.streaming_writer(basename) as file:
     ngas = ndark = nstar = 0
     
     # just a placeholder
@@ -99,7 +105,7 @@ with tipsy.streaming_writer(output_file + '.tipsy') as file:
     if gadget_file.gas is not None:
         gas = gadget_file.gas
         ngas += gas.size
-        gas_temp = convert_U_to_temperature(gadget_params, gadget_file)
+        gas_temp = convert_U_to_temperature(gadget_params, gadget_file, hubble)
         gas.mass *= mass_scale
         gas.velocities *= velocity_scale
         file.gas(gas.mass, gas.positions, gas.velocities, gas.density, gas_temp, gas.hsml, gas.metals, gas.potential, gas.size)
@@ -172,5 +178,5 @@ with tipsy.streaming_writer(output_file + '.tipsy') as file:
                    gadget_params['SofteningBndry'], boundary.size, is_blackhole=True)
 
 # update the header
-with tipsy.streaming_writer(output_file + '.tipsy', 'r+b') as file:
+with tipsy.streaming_writer(basename, 'r+b') as file:
     file.header(time, ngas, ndark, nstar)

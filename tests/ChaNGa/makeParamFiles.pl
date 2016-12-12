@@ -5,7 +5,7 @@ use Cwd qw(cwd);
 
 my $base_dir = cwd();
 
-for my $type ('nogas', 'gas', 'gas+sfr') {
+for my $type ('nogas', 'gas') {
 	my $dir = "$base_dir/$type";
 	mkpath($dir) if (! -d $dir);
 }

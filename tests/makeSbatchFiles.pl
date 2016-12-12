@@ -27,7 +27,7 @@ sub write_header($$$) {
 );
 }
 
-for my $type ('nogas', 'gas', 'gas+sfr') {
+for my $type ('nogas', 'gas') {
 	open my $fdOut, '>', "Gadget3.$type.sbatch" or die "Unable to create Gadget3.$type.sbatch: $!\n";
 	write_header($fdOut, 'gad'.$type, "$base_dir/Gadget3/$type");
 	print $fdOut "mpiexec -np $num_tasks $base_dir/Gadget3/$type/Gadget3 $base_dir/Gadget3/$type/${type}.params\n\n";

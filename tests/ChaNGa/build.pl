@@ -46,6 +46,4 @@ if ($changa) {
 	execute("cd src/changa; ./configure; make depends; make -j$njobs");
 	copy('src/changa/ChaNGa', 'nogas/') or die;
 	copy('src/changa/ChaNGa', 'gas/') or die;
-	execute("cd src/changa; make clean; ./configure --enable-cooling=cosmo; make -j$njobs");
-	copy('src/changa/ChaNGa', 'gas+sfr/') or die;
 }
